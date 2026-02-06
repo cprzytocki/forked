@@ -29,6 +29,7 @@ pub fn run() {
             commands::discard_all_changes,
             commands::create_commit,
             commands::get_commit_history,
+            commands::get_commit_history_with_graph,
             commands::get_commit_details,
             // Branch commands
             commands::list_branches,

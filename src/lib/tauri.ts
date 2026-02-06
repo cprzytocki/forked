@@ -4,6 +4,7 @@ import type {
   RepoStatus,
   CommitInfo,
   CommitDetails,
+  CommitGraphEntry,
   BranchInfo,
   MergeResult,
   RemoteInfo,
@@ -75,6 +76,10 @@ export async function createCommit(message: string): Promise<CommitInfo> {
 
 export async function getCommitHistory(limit: number = 50, skip: number = 0): Promise<CommitInfo[]> {
   return invoke("get_commit_history", { limit, skip });
+}
+
+export async function getCommitHistoryWithGraph(limit: number = 50, skip: number = 0): Promise<CommitGraphEntry[]> {
+  return invoke("get_commit_history_with_graph", { limit, skip });
 }
 
 export async function getCommitDetails(oid: string): Promise<CommitDetails> {

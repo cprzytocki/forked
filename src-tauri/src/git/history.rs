@@ -2,6 +2,7 @@ use crate::error::GitClientError;
 use git2::{Oid, Repository, Sort};
 use serde::Serialize;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct CommitInfo {
@@ -15,6 +16,174 @@ pub struct CommitInfo {
     pub committer_email: String,
     pub time: i64,
     pub parent_ids: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct GraphConnection {
+    pub from_lane: usize,
+    pub to_lane: usize,
+    pub color_index: usize,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct GraphNode {
+    pub lane: usize,
+    pub color_index: usize,
+    pub connections_to_parents: Vec<GraphConnection>,
+    pub is_merge: bool,
+    pub branch_names: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct CommitGraphEntry {
+    pub commit: CommitInfo,
+    pub graph: GraphNode,
+}
+
+fn compute_graph(
+    commits: &[CommitInfo],
+    repo: &Repository,
+) -> Vec<GraphNode> {
+    // Collect branch names pointing at each commit
+    let mut commit_branches: HashMap<String, Vec<String>> = HashMap::new();
+    if let Ok(branches) = repo.branches(None) {
+        for branch_result in branches {
+            if let Ok((branch, _)) = branch_result {
+                if let (Some(name), Ok(Some(commit))) = (
+                    branch.name().ok().flatten(),
+                    branch.get().peel_to_commit().map(|c| Some(c)),
+                ) {
+                    let oid = commit.id().to_string();
+                    commit_branches
+                        .entry(oid)
+                        .or_default()
+                        .push(name.to_string());
+                }
+            }
+        }
+    }
+
+    // Lane assignment algorithm
+    // Active lanes: each slot holds the commit OID that "owns" that lane (the next expected commit in that lane)
+    let mut active_lanes: Vec<Option<String>> = Vec::new();
+    let mut nodes: Vec<GraphNode> = Vec::with_capacity(commits.len());
+    // Track which lane color to assign - we use a simple incrementing counter
+    let mut lane_colors: Vec<usize> = Vec::new();
+    let mut next_color: usize = 0;
+
+    for commit in commits.iter() {
+        let commit_id = &commit.id;
+        let is_merge = commit.parent_ids.len() > 1;
+
+        // Find which lane this commit should occupy
+        let lane = active_lanes
+            .iter()
+            .position(|slot| slot.as_deref() == Some(commit_id.as_str()));
+
+        let (node_lane, color_index) = if let Some(l) = lane {
+            // This commit was expected in lane l
+            let color = lane_colors[l];
+            (l, color)
+        } else {
+            // New lane needed - find first empty or append
+            let empty = active_lanes.iter().position(|s| s.is_none());
+            let l = empty.unwrap_or_else(|| {
+                active_lanes.push(None);
+                lane_colors.push(0);
+                active_lanes.len() - 1
+            });
+            let color = next_color;
+            next_color += 1;
+            lane_colors[l] = color;
+            (l, color)
+        };
+
+        // Build connections to parents
+        let mut connections: Vec<GraphConnection> = Vec::new();
+
+        if !commit.parent_ids.is_empty() {
+            // First parent continues in the same lane
+            let first_parent = &commit.parent_ids[0];
+            active_lanes[node_lane] = Some(first_parent.clone());
+
+            connections.push(GraphConnection {
+                from_lane: node_lane,
+                to_lane: node_lane,
+                color_index,
+            });
+
+            // Additional parents (merge) get their own lanes
+            for parent_id in commit.parent_ids.iter().skip(1) {
+                // Check if parent already has a lane
+                let parent_lane = active_lanes
+                    .iter()
+                    .position(|slot| slot.as_deref() == Some(parent_id.as_str()));
+
+                let target_lane = if let Some(pl) = parent_lane {
+                    pl
+                } else {
+                    // Allocate a new lane for this parent
+                    let empty = active_lanes.iter().position(|s| s.is_none());
+                    let l = empty.unwrap_or_else(|| {
+                        active_lanes.push(None);
+                        lane_colors.push(0);
+                        active_lanes.len() - 1
+                    });
+                    let c = next_color;
+                    next_color += 1;
+                    lane_colors[l] = c;
+                    active_lanes[l] = Some(parent_id.clone());
+                    l
+                };
+
+                connections.push(GraphConnection {
+                    from_lane: node_lane,
+                    to_lane: target_lane,
+                    color_index: lane_colors[target_lane],
+                });
+            }
+        } else {
+            // No parents - free this lane
+            active_lanes[node_lane] = None;
+        }
+
+        // Close any duplicate lanes for the same commit (can happen with merges)
+        // If multiple lanes were pointing to this commit, free the extras
+        for i in 0..active_lanes.len() {
+            if i != node_lane {
+                if active_lanes[i].as_deref() == Some(commit_id.as_str()) {
+                    // This lane was also waiting for this commit; redirect to first parent or free
+                    if !commit.parent_ids.is_empty() {
+                        active_lanes[i] = Some(commit.parent_ids[0].clone());
+                        connections.push(GraphConnection {
+                            from_lane: i,
+                            to_lane: node_lane,
+                            color_index: lane_colors[i],
+                        });
+                        // Now free this lane since first parent is already in node_lane
+                        active_lanes[i] = None;
+                    } else {
+                        active_lanes[i] = None;
+                    }
+                }
+            }
+        }
+
+        let branch_names = commit_branches
+            .get(commit_id)
+            .cloned()
+            .unwrap_or_default();
+
+        nodes.push(GraphNode {
+            lane: node_lane,
+            color_index,
+            connections_to_parents: connections,
+            is_merge,
+            branch_names,
+        });
+    }
+
+    nodes
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -156,6 +325,23 @@ pub fn get_commit_details(repo: &Repository, oid_str: &str) -> Result<CommitDeta
             deletions: del,
         },
     })
+}
+
+pub fn get_commit_history_with_graph(
+    repo: &Repository,
+    limit: usize,
+    skip: usize,
+) -> Result<Vec<CommitGraphEntry>, GitClientError> {
+    let commits = get_commit_history(repo, limit, skip)?;
+    let graph_nodes = compute_graph(&commits, repo);
+
+    let entries: Vec<CommitGraphEntry> = commits
+        .into_iter()
+        .zip(graph_nodes.into_iter())
+        .map(|(commit, graph)| CommitGraphEntry { commit, graph })
+        .collect();
+
+    Ok(entries)
 }
 
 pub fn create_commit(repo: &Repository, message: &str) -> Result<CommitInfo, GitClientError> {

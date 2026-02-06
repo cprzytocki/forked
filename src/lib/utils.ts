@@ -81,3 +81,14 @@ export function getStatusIcon(status: string): string {
       return "?";
   }
 }
+
+const BRANCH_COLOR_COUNT = 10;
+
+export function getBranchColorIndex(colorIndex: number): number {
+  return ((colorIndex % BRANCH_COLOR_COUNT) + BRANCH_COLOR_COUNT) % BRANCH_COLOR_COUNT;
+}
+
+export function getBranchColorHsl(colorIndex: number): string {
+  const idx = getBranchColorIndex(colorIndex);
+  return `hsl(var(--branch-${idx}))`;
+}
