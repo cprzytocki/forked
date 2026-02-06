@@ -11,7 +11,7 @@ pub fn get_callbacks<'a>() -> RemoteCallbacks<'a> {
         } else if allowed.contains(git2::CredentialType::USER_PASS_PLAINTEXT) {
             // Fallback to credential helper or default
             Cred::credential_helper(
-                &git2::Config::open_default().unwrap(),
+                &git2::Config::open_default()?,
                 _url,
                 username,
             )
@@ -24,7 +24,10 @@ pub fn get_callbacks<'a>() -> RemoteCallbacks<'a> {
 
     callbacks.push_update_reference(|refname, status| {
         if let Some(msg) = status {
-            eprintln!("Failed to push {}: {}", refname, msg);
+            return Err(git2::Error::from_str(&format!(
+                "Failed to push {}: {}",
+                refname, msg
+            )));
         }
         Ok(())
     });
@@ -126,11 +129,12 @@ pub fn pull_remote(
         .collect();
 
     if !conflicts.is_empty() {
+        let message = format!("Merge conflicts in {} files", conflicts.len());
         return Ok(PullResult {
             success: false,
             fast_forward: false,
-            conflicts: conflicts.clone(),
-            message: format!("Merge conflicts in {} files", conflicts.len()),
+            conflicts,
+            message,
         });
     }
 

@@ -62,6 +62,7 @@ export function Header() {
               onClick={handleFetch}
               disabled={isLoading || remotes.length === 0}
               title="Fetch"
+              aria-label="Fetch"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -75,6 +76,7 @@ export function Header() {
               onClick={handlePull}
               disabled={isLoading || !currentBranch || remotes.length === 0}
               title="Pull"
+              aria-label="Pull"
             >
               <Download className="h-4 w-4" />
             </Button>
@@ -84,6 +86,7 @@ export function Header() {
               onClick={handlePush}
               disabled={isLoading || !currentBranch || remotes.length === 0}
               title="Push"
+              aria-label="Push"
             >
               <Upload className="h-4 w-4" />
             </Button>
@@ -95,6 +98,7 @@ export function Header() {
               size="sm"
               onClick={openStashDialog}
               title="Stash"
+              aria-label="Stash"
             >
               <Archive className="h-4 w-4" />
             </Button>
@@ -111,6 +115,7 @@ export function Header() {
             size="sm"
             onClick={closeRepository}
             title="Close repository"
+            aria-label="Close repository"
           >
             <FolderOpen className="h-4 w-4" />
           </Button>
@@ -120,6 +125,7 @@ export function Header() {
           size="sm"
           onClick={toggleTheme}
           title="Toggle theme"
+          aria-label="Toggle theme"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />

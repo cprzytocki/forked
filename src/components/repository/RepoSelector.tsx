@@ -19,22 +19,19 @@ export function RepoSelector() {
         title: "Select Git Repository",
       } as const);
 
-      console.log("Selected path:", selected);
-
       if (selected) {
         await openRepository(selected);
       }
     } catch (error) {
       console.error("Failed to open repository:", error);
-      alert(`Failed to open repository: ${error}`);
     }
   };
 
   const handleOpenRecent = async (path: string) => {
     try {
       await openRepository(path);
-    } catch {
-      // Remove from recent if it fails to open
+    } catch (error) {
+      console.error("Failed to open recent repository:", error);
       removeRecentRepo(path);
     }
   };
@@ -88,7 +85,15 @@ export function RepoSelector() {
                 <div
                   key={path}
                   className="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer group"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleOpenRecent(path)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleOpenRecent(path);
+                    }
+                  }}
                 >
                   <FolderOpen className="h-4 w-4 text-muted-foreground" />
                   <span className="flex-1 text-sm truncate">{path}</span>

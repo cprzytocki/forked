@@ -95,7 +95,10 @@ pub fn checkout_branch(repo: &Repository, name: &str) -> Result<(), GitClientErr
     repo.checkout_tree(&object, None)?;
 
     match reference {
-        Some(gref) => repo.set_head(gref.name().unwrap())?,
+        Some(gref) => repo.set_head(
+            gref.name()
+                .ok_or_else(|| GitClientError::Operation("Reference name is not valid UTF-8".into()))?,
+        )?,
         None => repo.set_head_detached(object.id())?,
     }
 
@@ -124,7 +127,13 @@ pub fn merge_branch(repo: &Repository, name: &str) -> Result<MergeResult, GitCli
     }
 
     if analysis.is_fast_forward() {
-        let refname = format!("refs/heads/{}", repo.head()?.shorthand().unwrap_or("HEAD"));
+        let head = repo.head()?;
+        if !head.is_branch() {
+            return Err(GitClientError::Operation(
+                "Cannot fast-forward merge: HEAD is detached".into(),
+            ));
+        }
+        let refname = format!("refs/heads/{}", head.shorthand().unwrap_or("HEAD"));
         let mut reference = repo.find_reference(&refname)?;
         reference.set_target(merge_commit.id(), "Fast-forward merge")?;
         repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))?;
@@ -155,11 +164,12 @@ pub fn merge_branch(repo: &Repository, name: &str) -> Result<MergeResult, GitCli
         .collect();
 
     if !conflicts.is_empty() {
+        let message = format!("Merge conflicts in {} files", conflicts.len());
         return Ok(MergeResult {
             success: false,
             fast_forward: false,
-            conflicts: conflicts.clone(),
-            message: format!("Merge conflicts in {} files", conflicts.len()),
+            conflicts,
+            message,
         });
     }
 

@@ -34,15 +34,15 @@ pub fn clone_repository(
 
 #[tauri::command]
 pub fn get_status(state: State<AppState>) -> Result<RepoStatus, GitClientError> {
-    let repo_guard = state.repository.lock();
-    let repo = repo_guard.as_ref().ok_or(GitClientError::NoRepository)?;
+    let guard = state.repo.lock();
+    let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;
     git::get_status(repo)
 }
 
 #[tauri::command]
 pub fn get_repo_info(state: State<AppState>) -> Result<RepoInfo, GitClientError> {
-    let repo_guard = state.repository.lock();
-    let repo = repo_guard.as_ref().ok_or(GitClientError::NoRepository)?;
+    let guard = state.repo.lock();
+    let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;
     git::get_repo_info(repo)
 }
 
