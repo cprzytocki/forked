@@ -62,9 +62,8 @@ export function DetailsPanel() {
         <div className="p-2 border-b">
           <div className="flex items-center gap-2">
             <GitCommit className="h-4 w-4" />
-            <span className="font-mono text-sm">{selectedCommit.short_id}</span>
+            <span className="font-mono text-sm">{selectedCommit.short_id} - {selectedCommit.summary}</span>
           </div>
-          <p className="text-sm mt-1 truncate">{selectedCommit.summary}</p>
         </div>
         <ScrollArea className="flex-1">
           <CommitDetails commit={selectedCommit} diff={currentCommitDiff} />
