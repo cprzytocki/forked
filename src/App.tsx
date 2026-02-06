@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useRepoStore } from "@/stores/repoStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -15,7 +15,7 @@ import { StashDialog } from "@/components/staging/StashDialog";
 
 function App() {
   const { repoInfo, error, clearError } = useRepoStore();
-  const { theme, setTheme, viewMode } = useUiStore();
+  const { theme, viewMode } = useUiStore();
   const { addRecentRepo, sidebarWidth, detailsPanelWidth } = useSettingsStore();
 
   // Initialize theme

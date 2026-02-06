@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { CommitInfo, CommitDiff, FileDiff } from "@/lib/types";
 import { formatDate, getStatusColor, cn } from "@/lib/utils";
 import { DiffViewer } from "@/components/diff/DiffViewer";

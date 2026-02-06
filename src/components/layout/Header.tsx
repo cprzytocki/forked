@@ -1,4 +1,3 @@
-import React from "react";
 import { useRepoStore } from "@/stores/repoStore";
 import { useUiStore } from "@/stores/uiStore";
 import { Button } from "@/components/common/Button";
@@ -10,7 +9,6 @@ import {
   FolderOpen,
   Moon,
   Sun,
-  Settings,
   Archive,
   Loader2,
 } from "lucide-react";
@@ -22,7 +20,6 @@ export function Header() {
     remotes,
     isLoading,
     closeRepository,
-    refreshAll,
     fetch,
     pull,
     push,

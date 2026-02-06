@@ -1,4 +1,3 @@
-import React from "react";
 import type { FileDiff, DiffHunk, DiffLine } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

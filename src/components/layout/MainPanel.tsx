@@ -1,4 +1,3 @@
-import React from "react";
 import { useRepoStore } from "@/stores/repoStore";
 import { useUiStore } from "@/stores/uiStore";
 import { ScrollArea } from "@/components/common/ScrollArea";

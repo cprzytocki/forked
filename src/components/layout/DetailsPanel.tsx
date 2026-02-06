@@ -1,4 +1,3 @@
-import React from "react";
 import { useUiStore } from "@/stores/uiStore";
 import { useRepoStore } from "@/stores/repoStore";
 import { ScrollArea } from "@/components/common/ScrollArea";
@@ -12,7 +11,6 @@ export function DetailsPanel() {
     currentFileDiff,
     currentCommitDiff,
     isDiffLoading,
-    selectedFile,
     isSelectedFileStaged,
   } = useUiStore();
   const { selectedCommit } = useRepoStore();
