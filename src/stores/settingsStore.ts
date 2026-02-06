@@ -15,7 +15,7 @@ interface SettingsState {
 
   // UI settings
   sidebarWidth: number;
-  detailsPanelWidth: number;
+  detailsPanelHeight: number;
 
   // Actions
   addRecentRepo: (path: string) => void;
@@ -26,7 +26,7 @@ interface SettingsState {
   setDiffContextLines: (lines: number) => void;
   setShowWhitespace: (show: boolean) => void;
   setSidebarWidth: (width: number) => void;
-  setDetailsPanelWidth: (width: number) => void;
+  setDetailsPanelHeight: (height: number) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -38,7 +38,7 @@ export const useSettingsStore = create<SettingsState>()(
       diffContextLines: 3,
       showWhitespace: false,
       sidebarWidth: 280,
-      detailsPanelWidth: 400,
+      detailsPanelHeight: 300,
 
       addRecentRepo: (path: string) => {
         const { recentRepos } = get();
@@ -58,7 +58,7 @@ export const useSettingsStore = create<SettingsState>()(
       setDiffContextLines: (lines: number) => set({ diffContextLines: lines }),
       setShowWhitespace: (show: boolean) => set({ showWhitespace: show }),
       setSidebarWidth: (width: number) => set({ sidebarWidth: width }),
-      setDetailsPanelWidth: (width: number) => set({ detailsPanelWidth: width }),
+      setDetailsPanelHeight: (height: number) => set({ detailsPanelHeight: height }),
     }),
     {
       name: "git-client-settings",
