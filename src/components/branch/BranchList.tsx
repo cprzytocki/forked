@@ -27,7 +27,15 @@ function BranchItem({ branch, onCheckout, onDelete, onMerge }: BranchItemProps) 
         "group flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer",
         branch.is_head && "bg-accent"
       )}
+      role="button"
+      tabIndex={0}
       onClick={onCheckout}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onCheckout();
+        }
+      }}
     >
       {branch.is_remote ? (
         <Cloud className="h-4 w-4 text-muted-foreground" />
@@ -49,6 +57,7 @@ function BranchItem({ branch, onCheckout, onDelete, onMerge }: BranchItemProps) 
               onMerge();
             }}
             title="Merge into current branch"
+            aria-label="Merge into current branch"
           >
             <GitMerge className="h-3 w-3" />
           </Button>
@@ -61,6 +70,7 @@ function BranchItem({ branch, onCheckout, onDelete, onMerge }: BranchItemProps) 
               onDelete();
             }}
             title="Delete branch"
+            aria-label="Delete branch"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -89,6 +99,8 @@ export function BranchList() {
           size="icon"
           className="h-6 w-6"
           onClick={openCreateBranchDialog}
+          title="Create branch"
+          aria-label="Create branch"
         >
           <Plus className="h-4 w-4" />
         </Button>

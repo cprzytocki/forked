@@ -39,7 +39,15 @@ function FileItem({
         "group flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm",
         isSelected && "bg-accent"
       )}
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
       <span className={cn("w-4 text-center font-mono text-xs", getStatusColor(file.status))}>
         {getStatusIcon(file.status)}
@@ -59,6 +67,7 @@ function FileItem({
               onUnstage?.();
             }}
             title="Unstage"
+            aria-label="Unstage"
           >
             <Minus className="h-3 w-3" />
           </Button>
@@ -73,6 +82,7 @@ function FileItem({
                 onStage?.();
               }}
               title="Stage"
+              aria-label="Stage"
             >
               <Plus className="h-3 w-3" />
             </Button>
@@ -86,6 +96,7 @@ function FileItem({
                   onDiscard?.();
                 }}
                 title="Discard changes"
+                aria-label="Discard changes"
               >
                 <RotateCcw className="h-3 w-3" />
               </Button>
@@ -116,7 +127,15 @@ function FileSection({ title, files, isStaged, onStageAll, onUnstageAll }: FileS
     <div className="mb-2">
       <div
         className="flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm"
+        role="button"
+        tabIndex={0}
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
       >
         {isExpanded ? (
           <ChevronDown className="h-4 w-4" />
@@ -135,6 +154,7 @@ function FileSection({ title, files, isStaged, onStageAll, onUnstageAll }: FileS
               onUnstageAll?.();
             }}
             title="Unstage all"
+            aria-label="Unstage all"
           >
             <Minus className="h-3 w-3" />
           </Button>
@@ -148,6 +168,7 @@ function FileSection({ title, files, isStaged, onStageAll, onUnstageAll }: FileS
               onStageAll?.();
             }}
             title="Stage all"
+            aria-label="Stage all"
           >
             <Plus className="h-3 w-3" />
           </Button>
