@@ -25,10 +25,10 @@ export function CloneDialog() {
       directory: true,
       multiple: false,
       title: "Select Clone Location",
-    });
+    } as const);
 
     if (selected) {
-      setPath(selected as string);
+      setPath(selected);
     }
   };
 

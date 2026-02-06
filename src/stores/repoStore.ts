@@ -131,7 +131,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     set({
       repoInfo: null,
       status: null,
-      commits: [] as CommitGraphEntry[],
+      commits: [],
       selectedCommit: null,
       branches: [],
       currentBranch: null,

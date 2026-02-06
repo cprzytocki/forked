@@ -17,12 +17,12 @@ export function RepoSelector() {
         directory: true,
         multiple: false,
         title: "Select Git Repository",
-      });
+      } as const);
 
       console.log("Selected path:", selected);
 
       if (selected) {
-        await openRepository(selected as string);
+        await openRepository(selected);
       }
     } catch (error) {
       console.error("Failed to open repository:", error);
