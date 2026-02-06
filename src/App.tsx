@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useRepoStore } from "@/stores/repoStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -15,8 +15,13 @@ import { StashDialog } from "@/components/staging/StashDialog";
 
 function App() {
   const { repoInfo, error, clearError } = useRepoStore();
-  const { theme, viewMode } = useUiStore();
-  const { addRecentRepo, sidebarWidth, detailsPanelWidth } = useSettingsStore();
+  const { theme, viewMode, detailView, isDiffLoading } = useUiStore();
+  const { addRecentRepo, sidebarWidth, detailsPanelHeight, setDetailsPanelHeight } = useSettingsStore();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  const showDetailsPanel = detailView !== "none" || isDiffLoading;
 
   // Initialize theme
   useEffect(() => {
@@ -34,11 +39,42 @@ function App() {
   useEffect(() => {
     if (error) {
       console.error("Git Client Error:", error);
-      // Could add a toast notification here
       const timeout = setTimeout(() => clearError(), 5000);
       return () => clearTimeout(timeout);
     }
   }, [error, clearError]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const newHeight = rect.bottom - e.clientY;
+      const clamped = Math.max(100, Math.min(newHeight, rect.height - 100));
+      setDetailsPanelHeight(clamped);
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging.current) {
+        isDragging.current = false;
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [setDetailsPanelHeight]);
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
@@ -66,10 +102,10 @@ function App() {
               <Sidebar />
             </div>
 
-            {/* Main content area */}
-            <div className="flex-1 flex overflow-hidden">
-              {/* Middle panel - History or Branches */}
-              <div className="flex-1 border-r">
+            {/* Main content area - vertical split */}
+            <div ref={containerRef} className="flex-1 flex flex-col overflow-hidden">
+              {/* Top panel - History or Branches */}
+              <div className="flex-1 min-h-0 overflow-hidden">
                 {viewMode === "branches" ? (
                   <BranchList />
                 ) : (
@@ -77,10 +113,21 @@ function App() {
                 )}
               </div>
 
-              {/* Details panel - Diff viewer */}
-              <div style={{ width: detailsPanelWidth }} className="flex-shrink-0">
-                <DetailsPanel />
-              </div>
+              {/* Draggable divider + Details panel */}
+              {showDetailsPanel && (
+                <>
+                  <div
+                    className="flex-shrink-0 h-1 cursor-row-resize bg-border hover:bg-primary/50 transition-colors"
+                    onMouseDown={handleMouseDown}
+                  />
+                  <div
+                    style={{ height: detailsPanelHeight }}
+                    className="flex-shrink-0 overflow-hidden border-t"
+                  >
+                    <DetailsPanel />
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}
