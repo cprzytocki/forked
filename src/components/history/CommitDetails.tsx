@@ -90,7 +90,7 @@ export function CommitDetails({ commit, diff }: CommitDetailsProps) {
     <div>
       {/* Commit info */}
       <div className="p-4 border-b bg-muted/50">
-        <p className="text-sm whitespace-pre-wrap mb-4">{commit.message}</p>
+        <p className="text-sm mb-4">{commit.message}</p>
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <User className="h-3 w-3" />
