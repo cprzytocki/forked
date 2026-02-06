@@ -1,0 +1,85 @@
+import React, { useState } from "react";
+import { open } from "@tauri-apps/plugin-dialog";
+import { useRepoStore } from "@/stores/repoStore";
+import { useUiStore } from "@/stores/uiStore";
+import { Button } from "@/components/common/Button";
+import { Input } from "@/components/common/Input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/common/Dialog";
+import { FolderOpen, Loader2 } from "lucide-react";
+
+export function InitDialog() {
+  const { initRepository, isLoading } = useRepoStore();
+  const { isInitDialogOpen, closeInitDialog } = useUiStore();
+  const [path, setPath] = useState("");
+
+  const handleSelectPath = async () => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: "Select Location for New Repository",
+    });
+
+    if (selected) {
+      setPath(selected as string);
+    }
+  };
+
+  const handleInit = async () => {
+    if (path) {
+      await initRepository(path);
+      closeInitDialog();
+      setPath("");
+    }
+  };
+
+  return (
+    <Dialog open={isInitDialogOpen} onOpenChange={closeInitDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Initialize Repository</DialogTitle>
+          <DialogDescription>
+            Create a new Git repository in the selected folder
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Location</label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Select a folder..."
+                value={path}
+                onChange={(e) => setPath(e.target.value)}
+                className="flex-1"
+              />
+              <Button variant="outline" onClick={handleSelectPath}>
+                <FolderOpen className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={closeInitDialog}>
+            Cancel
+          </Button>
+          <Button onClick={handleInit} disabled={!path || isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Initializing...
+              </>
+            ) : (
+              "Initialize"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

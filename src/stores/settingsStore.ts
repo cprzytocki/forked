@@ -1,0 +1,67 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface SettingsState {
+  // Recent repositories
+  recentRepos: string[];
+
+  // Editor settings
+  fontSize: number;
+  tabSize: number;
+
+  // Diff settings
+  diffContextLines: number;
+  showWhitespace: boolean;
+
+  // UI settings
+  sidebarWidth: number;
+  detailsPanelWidth: number;
+
+  // Actions
+  addRecentRepo: (path: string) => void;
+  removeRecentRepo: (path: string) => void;
+  clearRecentRepos: () => void;
+  setFontSize: (size: number) => void;
+  setTabSize: (size: number) => void;
+  setDiffContextLines: (lines: number) => void;
+  setShowWhitespace: (show: boolean) => void;
+  setSidebarWidth: (width: number) => void;
+  setDetailsPanelWidth: (width: number) => void;
+}
+
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set, get) => ({
+      recentRepos: [],
+      fontSize: 13,
+      tabSize: 4,
+      diffContextLines: 3,
+      showWhitespace: false,
+      sidebarWidth: 280,
+      detailsPanelWidth: 400,
+
+      addRecentRepo: (path: string) => {
+        const { recentRepos } = get();
+        const filtered = recentRepos.filter((p) => p !== path);
+        set({ recentRepos: [path, ...filtered].slice(0, 10) });
+      },
+
+      removeRecentRepo: (path: string) => {
+        const { recentRepos } = get();
+        set({ recentRepos: recentRepos.filter((p) => p !== path) });
+      },
+
+      clearRecentRepos: () => set({ recentRepos: [] }),
+
+      setFontSize: (size: number) => set({ fontSize: size }),
+      setTabSize: (size: number) => set({ tabSize: size }),
+      setDiffContextLines: (lines: number) => set({ diffContextLines: lines }),
+      setShowWhitespace: (show: boolean) => set({ showWhitespace: show }),
+      setSidebarWidth: (width: number) => set({ sidebarWidth: width }),
+      setDetailsPanelWidth: (width: number) => set({ detailsPanelWidth: width }),
+    }),
+    {
+      name: "git-client-settings",
+    }
+  )
+);

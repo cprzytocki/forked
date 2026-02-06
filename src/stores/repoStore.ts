@@ -1,0 +1,371 @@
+import { create } from "zustand";
+import type {
+  RepoInfo,
+  RepoStatus,
+  CommitInfo,
+  BranchInfo,
+  RemoteInfo,
+  StashEntry,
+} from "@/lib/types";
+import * as tauri from "@/lib/tauri";
+
+interface RepoState {
+  // Repository state
+  repoInfo: RepoInfo | null;
+  status: RepoStatus | null;
+  isLoading: boolean;
+  error: string | null;
+
+  // Commits
+  commits: CommitInfo[];
+  selectedCommit: CommitInfo | null;
+
+  // Branches
+  branches: BranchInfo[];
+  currentBranch: string | null;
+
+  // Remotes
+  remotes: RemoteInfo[];
+
+  // Stashes
+  stashes: StashEntry[];
+
+  // Actions
+  openRepository: (path: string) => Promise<void>;
+  initRepository: (path: string) => Promise<void>;
+  cloneRepository: (url: string, path: string) => Promise<void>;
+  closeRepository: () => void;
+  refreshStatus: () => Promise<void>;
+  refreshCommits: (limit?: number) => Promise<void>;
+  refreshBranches: () => Promise<void>;
+  refreshRemotes: () => Promise<void>;
+  refreshStashes: () => Promise<void>;
+  refreshAll: () => Promise<void>;
+
+  // Staging actions
+  stageFile: (path: string) => Promise<void>;
+  unstageFile: (path: string) => Promise<void>;
+  stageAll: () => Promise<void>;
+  unstageAll: () => Promise<void>;
+  discardChanges: (path: string) => Promise<void>;
+
+  // Commit actions
+  createCommit: (message: string) => Promise<void>;
+  selectCommit: (commit: CommitInfo | null) => void;
+
+  // Branch actions
+  createBranch: (name: string) => Promise<void>;
+  checkoutBranch: (name: string) => Promise<void>;
+  deleteBranch: (name: string) => Promise<void>;
+  mergeBranch: (name: string) => Promise<void>;
+
+  // Remote actions
+  fetch: (remote: string) => Promise<void>;
+  pull: (remote: string, branch: string) => Promise<void>;
+  push: (remote: string, branch: string) => Promise<void>;
+
+  // Stash actions
+  stashSave: (message?: string) => Promise<void>;
+  stashPop: (index: number) => Promise<void>;
+  stashApply: (index: number) => Promise<void>;
+  stashDrop: (index: number) => Promise<void>;
+
+  // Error handling
+  clearError: () => void;
+}
+
+export const useRepoStore = create<RepoState>((set, get) => ({
+  repoInfo: null,
+  status: null,
+  isLoading: false,
+  error: null,
+  commits: [],
+  selectedCommit: null,
+  branches: [],
+  currentBranch: null,
+  remotes: [],
+  stashes: [],
+
+  openRepository: async (path: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const repoInfo = await tauri.openRepository(path);
+      set({ repoInfo, currentBranch: repoInfo.head_name });
+      await get().refreshAll();
+    } catch (e) {
+      set({ error: String(e) });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  initRepository: async (path: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const repoInfo = await tauri.initRepository(path);
+      set({ repoInfo, currentBranch: repoInfo.head_name });
+      await get().refreshAll();
+    } catch (e) {
+      set({ error: String(e) });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  cloneRepository: async (url: string, path: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const repoInfo = await tauri.cloneRepository(url, path);
+      set({ repoInfo, currentBranch: repoInfo.head_name });
+      await get().refreshAll();
+    } catch (e) {
+      set({ error: String(e) });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  closeRepository: () => {
+    tauri.closeRepository();
+    set({
+      repoInfo: null,
+      status: null,
+      commits: [],
+      selectedCommit: null,
+      branches: [],
+      currentBranch: null,
+      remotes: [],
+      stashes: [],
+    });
+  },
+
+  refreshStatus: async () => {
+    try {
+      const status = await tauri.getStatus();
+      set({ status });
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  refreshCommits: async (limit = 50) => {
+    try {
+      const commits = await tauri.getCommitHistory(limit);
+      set({ commits });
+    } catch (e) {
+      // Empty repo might not have commits
+      set({ commits: [] });
+    }
+  },
+
+  refreshBranches: async () => {
+    try {
+      const branches = await tauri.listBranches();
+      const currentBranch = branches.find((b) => b.is_head)?.name || null;
+      set({ branches, currentBranch });
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  refreshRemotes: async () => {
+    try {
+      const remotes = await tauri.listRemotes();
+      set({ remotes });
+    } catch (e) {
+      set({ remotes: [] });
+    }
+  },
+
+  refreshStashes: async () => {
+    try {
+      const stashes = await tauri.stashList();
+      set({ stashes });
+    } catch (e) {
+      set({ stashes: [] });
+    }
+  },
+
+  refreshAll: async () => {
+    await Promise.all([
+      get().refreshStatus(),
+      get().refreshCommits(),
+      get().refreshBranches(),
+      get().refreshRemotes(),
+      get().refreshStashes(),
+    ]);
+  },
+
+  stageFile: async (path: string) => {
+    try {
+      await tauri.stageFile(path);
+      await get().refreshStatus();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  unstageFile: async (path: string) => {
+    try {
+      await tauri.unstageFile(path);
+      await get().refreshStatus();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  stageAll: async () => {
+    try {
+      await tauri.stageAll();
+      await get().refreshStatus();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  unstageAll: async () => {
+    try {
+      await tauri.unstageAll();
+      await get().refreshStatus();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  discardChanges: async (path: string) => {
+    try {
+      await tauri.discardChanges(path);
+      await get().refreshStatus();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  createCommit: async (message: string) => {
+    try {
+      await tauri.createCommit(message);
+      await Promise.all([get().refreshStatus(), get().refreshCommits()]);
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  selectCommit: (commit: CommitInfo | null) => {
+    set({ selectedCommit: commit });
+  },
+
+  createBranch: async (name: string) => {
+    try {
+      await tauri.createBranch(name);
+      await get().refreshBranches();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  checkoutBranch: async (name: string) => {
+    try {
+      await tauri.checkoutBranch(name);
+      await get().refreshAll();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  deleteBranch: async (name: string) => {
+    try {
+      await tauri.deleteBranch(name);
+      await get().refreshBranches();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  mergeBranch: async (name: string) => {
+    try {
+      const result = await tauri.mergeBranch(name);
+      if (!result.success) {
+        set({ error: result.message });
+      }
+      await get().refreshAll();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  fetch: async (remote: string) => {
+    set({ isLoading: true });
+    try {
+      await tauri.fetchRemote(remote);
+      await get().refreshBranches();
+    } catch (e) {
+      set({ error: String(e) });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  pull: async (remote: string, branch: string) => {
+    set({ isLoading: true });
+    try {
+      const result = await tauri.pullRemote(remote, branch);
+      if (!result.success) {
+        set({ error: result.message });
+      }
+      await get().refreshAll();
+    } catch (e) {
+      set({ error: String(e) });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  push: async (remote: string, branch: string) => {
+    set({ isLoading: true });
+    try {
+      await tauri.pushRemote(remote, branch);
+    } catch (e) {
+      set({ error: String(e) });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  stashSave: async (message?: string) => {
+    try {
+      await tauri.stashSave(message);
+      await Promise.all([get().refreshStatus(), get().refreshStashes()]);
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  stashPop: async (index: number) => {
+    try {
+      await tauri.stashPop(index);
+      await Promise.all([get().refreshStatus(), get().refreshStashes()]);
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  stashApply: async (index: number) => {
+    try {
+      await tauri.stashApply(index);
+      await Promise.all([get().refreshStatus(), get().refreshStashes()]);
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  stashDrop: async (index: number) => {
+    try {
+      await tauri.stashDrop(index);
+      await get().refreshStashes();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  clearError: () => set({ error: null }),
+}));
