@@ -1,6 +1,6 @@
-# Git Client
+# Forked
 
-A fast, beautiful, multiplatform desktop Git client built with Tauri, Rust, and React.
+A fast, multiplatform desktop Git client built with Tauri, Rust, and React.
 
 ## Features
 
