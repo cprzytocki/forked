@@ -31,6 +31,18 @@
     --git-modified: 38 92% 50%;
     --git-renamed: 217 91% 60%;
     --git-untracked: 215 16% 47%;
+
+    /* Branch graph colors */
+    --branch-0: 210 100% 50%;
+    --branch-1: 142 70% 40%;
+    --branch-2: 340 82% 52%;
+    --branch-3: 38 92% 50%;
+    --branch-4: 262 80% 55%;
+    --branch-5: 180 70% 40%;
+    --branch-6: 16 85% 55%;
+    --branch-7: 300 60% 50%;
+    --branch-8: 90 60% 40%;
+    --branch-9: 200 80% 60%;
   }
 
   .dark {
@@ -60,6 +72,18 @@
     --git-modified: 38 92% 50%;
     --git-renamed: 217 91% 65%;
     --git-untracked: 215 20% 65%;
+
+    /* Branch graph colors - dark mode */
+    --branch-0: 210 100% 60%;
+    --branch-1: 142 70% 55%;
+    --branch-2: 340 82% 60%;
+    --branch-3: 38 92% 55%;
+    --branch-4: 262 80% 65%;
+    --branch-5: 180 70% 55%;
+    --branch-6: 16 85% 60%;
+    --branch-7: 300 60% 60%;
+    --branch-8: 90 60% 55%;
+    --branch-9: 200 80% 65%;
   }
 }
 
@@ -129,4 +153,9 @@
 
 .status-untracked {
   @apply text-git-untracked;
+}
+
+/* Branch label badges */
+.branch-badge {
+  @apply inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium leading-none whitespace-nowrap;
 }

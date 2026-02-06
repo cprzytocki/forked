@@ -59,6 +59,26 @@ export interface CommitDetails {
   stats: CommitStats;
 }
 
+// Graph types
+export interface GraphConnection {
+  from_lane: number;
+  to_lane: number;
+  color_index: number;
+}
+
+export interface GraphNode {
+  lane: number;
+  color_index: number;
+  connections_to_parents: GraphConnection[];
+  is_merge: boolean;
+  branch_names: string[];
+}
+
+export interface CommitGraphEntry {
+  commit: CommitInfo;
+  graph: GraphNode;
+}
+
 // Branch types
 export interface BranchInfo {
   name: string;

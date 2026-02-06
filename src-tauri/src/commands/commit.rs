@@ -1,5 +1,5 @@
 use crate::error::GitClientError;
-use crate::git::{self, CommitDetails, CommitInfo};
+use crate::git::{self, CommitDetails, CommitGraphEntry, CommitInfo};
 use crate::state::AppState;
 use tauri::State;
 
@@ -61,6 +61,17 @@ pub fn get_commit_history(
     let repo_guard = state.repository.lock();
     let repo = repo_guard.as_ref().ok_or(GitClientError::NoRepository)?;
     git::get_commit_history(repo, limit, skip)
+}
+
+#[tauri::command]
+pub fn get_commit_history_with_graph(
+    limit: usize,
+    skip: usize,
+    state: State<AppState>,
+) -> Result<Vec<CommitGraphEntry>, GitClientError> {
+    let repo_guard = state.repository.lock();
+    let repo = repo_guard.as_ref().ok_or(GitClientError::NoRepository)?;
+    git::get_commit_history_with_graph(repo, limit, skip)
 }
 
 #[tauri::command]

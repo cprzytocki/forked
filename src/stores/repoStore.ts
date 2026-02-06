@@ -3,6 +3,7 @@ import type {
   RepoInfo,
   RepoStatus,
   CommitInfo,
+  CommitGraphEntry,
   BranchInfo,
   RemoteInfo,
   StashEntry,
@@ -17,7 +18,7 @@ interface RepoState {
   error: string | null;
 
   // Commits
-  commits: CommitInfo[];
+  commits: CommitGraphEntry[];
   selectedCommit: CommitInfo | null;
 
   // Branches
@@ -130,7 +131,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     set({
       repoInfo: null,
       status: null,
-      commits: [],
+      commits: [] as CommitGraphEntry[],
       selectedCommit: null,
       branches: [],
       currentBranch: null,
@@ -150,7 +151,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
 
   refreshCommits: async (limit = 50) => {
     try {
-      const commits = await tauri.getCommitHistory(limit);
+      const commits = await tauri.getCommitHistoryWithGraph(limit);
       set({ commits });
     } catch (e) {
       // Empty repo might not have commits
