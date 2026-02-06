@@ -24,10 +24,10 @@ export function InitDialog() {
       directory: true,
       multiple: false,
       title: "Select Location for New Repository",
-    });
+    } as const);
 
     if (selected) {
-      setPath(selected as string);
+      setPath(selected);
     }
   };
 
