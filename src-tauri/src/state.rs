@@ -1,3 +1,4 @@
+use crate::watcher::RepoWatcher;
 use git2::Repository;
 use parking_lot::Mutex;
 use std::path::PathBuf;
@@ -9,6 +10,7 @@ pub struct RepoState {
 
 pub struct AppState {
     pub repo: Mutex<RepoState>,
+    pub watcher: Mutex<Option<RepoWatcher>>,
 }
 
 impl AppState {
@@ -18,6 +20,7 @@ impl AppState {
                 repository: None,
                 path: None,
             }),
+            watcher: Mutex::new(None),
         }
     }
 
