@@ -159,6 +159,8 @@ export async function getGitConfig(): Promise<GitConfig> {
   return invoke("get_git_config");
 }
 
+
+// another test
 export async function setGitConfig(key: string, value: string): Promise<void> {
   return invoke("set_git_config", { key, value });
 }
