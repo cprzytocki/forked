@@ -73,7 +73,17 @@ export function MainPanel() {
 
   const maxLanes = useMemo(() => {
     if (commits.length === 0) return 0;
-    return Math.max(...commits.map((e) => e.graph.lane)) + 1;
+    let max = 0;
+    for (const e of commits) {
+      max = Math.max(max, e.graph.lane);
+      for (const conn of e.graph.connections_to_parents) {
+        max = Math.max(max, conn.to_lane);
+      }
+      for (const pt of e.graph.pass_through_lanes) {
+        max = Math.max(max, pt.lane);
+      }
+    }
+    return max + 1;
   }, [commits]);
 
   const handleSelectCommit = (commit: CommitInfo) => {

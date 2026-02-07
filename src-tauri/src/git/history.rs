@@ -26,10 +26,17 @@ pub struct GraphConnection {
 }
 
 #[derive(Debug, Serialize, Clone)]
+pub struct PassThroughLane {
+    pub lane: usize,
+    pub color_index: usize,
+}
+
+#[derive(Debug, Serialize, Clone)]
 pub struct GraphNode {
     pub lane: usize,
     pub color_index: usize,
     pub connections_to_parents: Vec<GraphConnection>,
+    pub pass_through_lanes: Vec<PassThroughLane>,
     pub is_merge: bool,
     pub branch_names: Vec<String>,
 }
@@ -97,6 +104,21 @@ fn compute_graph(
             lane_colors[l] = color;
             (l, color)
         };
+
+        // Snapshot which lanes are active BEFORE processing this commit's parents.
+        // Exclude the node's own lane and any lanes converging into this commit
+        // (those will become connections, not pass-throughs).
+        let pre_existing_lanes: Vec<(usize, usize)> = active_lanes
+            .iter()
+            .enumerate()
+            .filter_map(|(i, slot)| {
+                if i != node_lane && slot.as_deref() != Some(commit_id.as_str()) && slot.is_some() {
+                    Some((i, lane_colors[i]))
+                } else {
+                    None
+                }
+            })
+            .collect();
 
         // Build connections to parents
         let mut connections: Vec<GraphConnection> = Vec::new();
@@ -169,6 +191,17 @@ fn compute_graph(
             }
         }
 
+        // Pass-through lanes are only those that were active BEFORE this commit,
+        // not lanes newly allocated by merge connections on this row.
+        let pass_through_lanes: Vec<PassThroughLane> = pre_existing_lanes
+            .into_iter()
+            .filter(|(i, _)| {
+                // Also exclude lanes that were closed (duplicate lane handling above)
+                active_lanes[*i].is_some()
+            })
+            .map(|(lane, color_index)| PassThroughLane { lane, color_index })
+            .collect();
+
         let branch_names = commit_branches
             .get(commit_id)
             .cloned()
@@ -178,6 +211,7 @@ fn compute_graph(
             lane: node_lane,
             color_index,
             connections_to_parents: connections,
+            pass_through_lanes,
             is_merge,
             branch_names,
         });

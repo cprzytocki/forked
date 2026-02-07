@@ -24,6 +24,23 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
       className="flex-shrink-0"
       style={{ minWidth: width }}
     >
+      {/* Draw pass-through lane lines (behind everything) */}
+      {node.pass_through_lanes.map((pt) => {
+        const ptX = pt.lane * LANE_WIDTH + LANE_WIDTH / 2;
+        const ptColor = getBranchColorHsl(pt.color_index);
+        return (
+          <line
+            key={`pt-${pt.lane}`}
+            x1={ptX}
+            y1={0}
+            x2={ptX}
+            y2={ROW_HEIGHT}
+            stroke={ptColor}
+            strokeWidth={2}
+          />
+        );
+      })}
+
       {/* Draw connections to parents */}
       {node.connections_to_parents.map((conn, i) => {
         const fromX = conn.from_lane * LANE_WIDTH + LANE_WIDTH / 2;
@@ -44,17 +61,32 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
             />
           );
         } else {
-          // Curved merge/branch line
-          const midY = centerY + (ROW_HEIGHT - centerY) * 0.5;
-          return (
-            <path
-              key={i}
-              d={`M ${fromX} ${centerY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${ROW_HEIGHT}`}
-              fill="none"
-              stroke={connColor}
-              strokeWidth={2}
-            />
-          );
+          const isBranchOut = conn.from_lane === node.lane;
+          if (isBranchOut) {
+            // Branch out: curve from node down to target lane at bottom
+            const midY = centerY + (ROW_HEIGHT - centerY) * 0.5;
+            return (
+              <path
+                key={i}
+                d={`M ${fromX} ${centerY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${ROW_HEIGHT}`}
+                fill="none"
+                stroke={connColor}
+                strokeWidth={2}
+              />
+            );
+          } else {
+            // Converge in: curve from source lane at top down to node at centerY
+            const midY = centerY * 0.5;
+            return (
+              <path
+                key={i}
+                d={`M ${fromX} ${0} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${centerY}`}
+                fill="none"
+                stroke={connColor}
+                strokeWidth={2}
+              />
+            );
+          }
         }
       })}
 
