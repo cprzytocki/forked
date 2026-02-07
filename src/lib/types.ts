@@ -66,10 +66,16 @@ export interface GraphConnection {
   color_index: number;
 }
 
+export interface PassThroughLane {
+  lane: number;
+  color_index: number;
+}
+
 export interface GraphNode {
   lane: number;
   color_index: number;
   connections_to_parents: GraphConnection[];
+  pass_through_lanes: PassThroughLane[];
   is_merge: boolean;
   branch_names: string[];
 }
