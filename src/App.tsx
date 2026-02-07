@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { useRepoStore } from "@/stores/repoStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -43,6 +44,25 @@ function App() {
       return () => clearTimeout(timeout);
     }
   }, [error, clearError]);
+
+  // Listen for file system changes from the Rust watcher
+  useEffect(() => {
+    if (!repoInfo) return;
+
+    let throttleTimer: ReturnType<typeof setTimeout> | null = null;
+    const unlisten = listen("repo-changed", () => {
+      if (throttleTimer) return;
+      throttleTimer = setTimeout(() => {
+        throttleTimer = null;
+      }, 300);
+      useRepoStore.getState().refreshAll();
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+      if (throttleTimer) clearTimeout(throttleTimer);
+    };
+  }, [repoInfo]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
