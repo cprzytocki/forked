@@ -1,7 +1,10 @@
 import { useUiStore } from "@/stores/uiStore";
 import { useRepoStore } from "@/stores/repoStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { ScrollArea } from "@/components/common/ScrollArea";
 import { DiffViewer } from "@/components/diff/DiffViewer";
+import { SplitDiffViewer } from "@/components/diff/SplitDiffViewer";
+import { DiffViewToggle } from "@/components/diff/DiffViewToggle";
 import { CommitDetails } from "@/components/history/CommitDetails";
 import { FileText, GitCommit, Loader2 } from "lucide-react";
 
@@ -14,6 +17,7 @@ export function DetailsPanel() {
     isSelectedFileStaged,
   } = useUiStore();
   const { selectedCommit } = useRepoStore();
+  const diffViewMode = useSettingsStore((s) => s.diffViewMode);
 
   if (isDiffLoading) {
     return (
@@ -40,6 +44,9 @@ export function DetailsPanel() {
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             <span className="font-semibold text-sm truncate">{currentFileDiff.path}</span>
+            <div className="ml-auto">
+              <DiffViewToggle />
+            </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
             <span className={isSelectedFileStaged ? "text-green-500" : "text-yellow-500"}>
@@ -50,7 +57,11 @@ export function DetailsPanel() {
           </div>
         </div>
         <ScrollArea className="flex-1">
-          <DiffViewer diff={currentFileDiff} />
+          {diffViewMode === "split" ? (
+            <SplitDiffViewer diff={currentFileDiff} />
+          ) : (
+            <DiffViewer diff={currentFileDiff} />
+          )}
         </ScrollArea>
       </div>
     );

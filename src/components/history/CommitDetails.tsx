@@ -1,7 +1,10 @@
 import { useState } from "react";
 import type { CommitInfo, CommitDiff, FileDiff } from "@/lib/types";
 import { formatDate, getStatusColor, cn } from "@/lib/utils";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { DiffViewer } from "@/components/diff/DiffViewer";
+import { SplitDiffViewer } from "@/components/diff/SplitDiffViewer";
+import { DiffViewToggle } from "@/components/diff/DiffViewToggle";
 import { ChevronDown, ChevronRight, Plus, Minus, User, Clock, Hash } from "lucide-react";
 
 interface FileItemProps {
@@ -11,6 +14,7 @@ interface FileItemProps {
 }
 
 function FileItem({ file, isExpanded, onToggle }: FileItemProps) {
+  const diffViewMode = useSettingsStore((s) => s.diffViewMode);
   const additions = file.hunks.reduce(
     (sum, hunk) => sum + hunk.lines.filter((l) => l.origin === "+").length,
     0
@@ -51,7 +55,11 @@ function FileItem({ file, isExpanded, onToggle }: FileItemProps) {
       </div>
       {isExpanded && (
         <div className="border-t">
-          <DiffViewer diff={file} />
+          {diffViewMode === "split" ? (
+            <SplitDiffViewer diff={file} />
+          ) : (
+            <DiffViewer diff={file} />
+          )}
         </div>
       )}
     </div>
@@ -139,6 +147,7 @@ export function CommitDetails({ commit, diff }: CommitDetailsProps) {
           >
             Collapse all
           </button>
+          <DiffViewToggle />
         </div>
       </div>
 
