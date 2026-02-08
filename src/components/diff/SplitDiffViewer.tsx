@@ -1,9 +1,22 @@
 import { useMemo } from "react";
 import type { FileDiff, DiffLine } from "@/lib/types";
-import { splitDiffHunks, type SplitHunk, type SplitDiffRow } from "@/lib/splitDiff";
+import {
+  splitDiffHunks,
+  type SplitHunk,
+  type SplitDiffRow,
+  type InlineSegment,
+} from "@/lib/splitDiff";
 import { cn } from "@/lib/utils";
 
-function SplitLineCell({ line, side }: { line: DiffLine | null; side: "left" | "right" }) {
+function SplitLineCell({
+  line,
+  side,
+  segments,
+}: {
+  line: DiffLine | null;
+  side: "left" | "right";
+  segments?: InlineSegment[];
+}) {
   if (!line) {
     return <div className="flex font-mono text-xs bg-muted/30 min-h-[1.5rem]" />;
   }
@@ -12,22 +25,37 @@ function SplitLineCell({ line, side }: { line: DiffLine | null; side: "left" | "
   const isDel = line.origin === "-";
 
   const bgClass = isDel
-    ? "bg-red-500/10 text-red-600 dark:text-red-400"
+    ? "bg-red-500/15"
     : isAdd
-      ? "bg-green-500/10 text-green-600 dark:text-green-400"
+      ? "bg-green-500/15"
+      : "";
+
+  const highlightClass = isDel
+    ? "bg-red-500/30"
+    : isAdd
+      ? "bg-green-500/30"
       : "";
 
   const lineNo = side === "left" ? line.old_lineno : line.new_lineno;
 
   return (
     <div className={cn("flex font-mono text-xs", bgClass)}>
-      <span className="w-12 text-right pr-2 text-muted-foreground select-none border-r shrink-0">
+      <span className="w-12 text-right pr-2 text-muted-foreground/60 select-none shrink-0">
         {lineNo || ""}
       </span>
-      <span className="w-4 text-center select-none shrink-0">
-        {isDel ? "-" : isAdd ? "+" : " "}
-      </span>
-      <pre className="flex-1 pl-1 whitespace-pre-wrap break-all">{line.content}</pre>
+      <pre className="flex-1 pl-2 whitespace-pre-wrap break-all">
+        {segments
+          ? segments.map((seg, i) =>
+              seg.highlighted ? (
+                <span key={i} className={highlightClass}>
+                  {seg.text}
+                </span>
+              ) : (
+                seg.text
+              )
+            )
+          : line.content}
+      </pre>
     </div>
   );
 }
@@ -35,11 +63,11 @@ function SplitLineCell({ line, side }: { line: DiffLine | null; side: "left" | "
 function SplitRow({ row }: { row: SplitDiffRow }) {
   return (
     <div className="flex">
-      <div className="w-1/2 border-r">
-        <SplitLineCell line={row.left} side="left" />
+      <div className="w-1/2 border-r border-border/50">
+        <SplitLineCell line={row.left} side="left" segments={row.leftSegments} />
       </div>
       <div className="w-1/2">
-        <SplitLineCell line={row.right} side="right" />
+        <SplitLineCell line={row.right} side="right" segments={row.rightSegments} />
       </div>
     </div>
   );
