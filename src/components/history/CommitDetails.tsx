@@ -1,11 +1,19 @@
-import { useState } from "react";
-import type { CommitInfo, CommitDiff, FileDiff } from "@/lib/types";
-import { formatDate, getStatusColor, cn } from "@/lib/utils";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { DiffViewer } from "@/components/diff/DiffViewer";
-import { SplitDiffViewer } from "@/components/diff/SplitDiffViewer";
-import { DiffViewToggle } from "@/components/diff/DiffViewToggle";
-import { ChevronDown, ChevronRight, Plus, Minus, User, Clock, Hash } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Hash,
+  Minus,
+  Plus,
+  User,
+} from 'lucide-react';
+import { useState } from 'react';
+import { DiffViewer } from '@/components/diff/DiffViewer';
+import { DiffViewToggle } from '@/components/diff/DiffViewToggle';
+import { SplitDiffViewer } from '@/components/diff/SplitDiffViewer';
+import type { CommitDiff, CommitInfo, FileDiff } from '@/lib/types';
+import { cn, formatDate, getStatusColor } from '@/lib/utils';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface FileItemProps {
   file: FileDiff;
@@ -16,18 +24,19 @@ interface FileItemProps {
 function FileItem({ file, isExpanded, onToggle }: FileItemProps) {
   const diffViewMode = useSettingsStore((s) => s.diffViewMode);
   const additions = file.hunks.reduce(
-    (sum, hunk) => sum + hunk.lines.filter((l) => l.origin === "+").length,
-    0
+    (sum, hunk) => sum + hunk.lines.filter((l) => l.origin === '+').length,
+    0,
   );
   const deletions = file.hunks.reduce(
-    (sum, hunk) => sum + hunk.lines.filter((l) => l.origin === "-").length,
-    0
+    (sum, hunk) => sum + hunk.lines.filter((l) => l.origin === '-').length,
+    0,
   );
 
   return (
     <div className="border-b last:border-b-0">
-      <div
-        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent"
+      <button
+        type="button"
+        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent w-full text-left"
         onClick={onToggle}
       >
         {isExpanded ? (
@@ -35,7 +44,7 @@ function FileItem({ file, isExpanded, onToggle }: FileItemProps) {
         ) : (
           <ChevronRight className="h-4 w-4" />
         )}
-        <span className={cn("text-sm", getStatusColor(file.status))}>
+        <span className={cn('text-sm', getStatusColor(file.status))}>
           {file.path}
         </span>
         <span className="ml-auto flex items-center gap-2 text-xs">
@@ -52,10 +61,10 @@ function FileItem({ file, isExpanded, onToggle }: FileItemProps) {
             </span>
           )}
         </span>
-      </div>
+      </button>
       {isExpanded && (
         <div className="border-t">
-          {diffViewMode === "split" ? (
+          {diffViewMode === 'split' ? (
             <SplitDiffViewer diff={file} />
           ) : (
             <DiffViewer diff={file} />
@@ -103,7 +112,9 @@ export function CommitDetails({ commit, diff }: CommitDetailsProps) {
           <div className="flex items-center gap-2">
             <User className="h-3 w-3" />
             <span>{commit.author_name}</span>
-            <span className="text-muted-foreground/50">&lt;{commit.author_email}&gt;</span>
+            <span className="text-muted-foreground/50">
+              &lt;{commit.author_email}&gt;
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-3 w-3" />
@@ -134,14 +145,12 @@ export function CommitDetails({ commit, diff }: CommitDetailsProps) {
           <span className="text-red-500">-{diff.stats.deletions}</span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            className="hover:underline"
-            onClick={expandAll}
-          >
+          <button type="button" className="hover:underline" onClick={expandAll}>
             Expand all
           </button>
           <span>/</span>
           <button
+            type="button"
             className="hover:underline"
             onClick={collapseAll}
           >

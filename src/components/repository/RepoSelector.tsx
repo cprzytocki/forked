@@ -1,10 +1,17 @@
-import { open } from "@tauri-apps/plugin-dialog";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { Button } from "@/components/common/Button";
-import { ScrollArea } from "@/components/common/ScrollArea";
-import { FolderOpen, FolderPlus, Download, Clock, Trash2, GitBranch } from "lucide-react";
+import { open } from '@tauri-apps/plugin-dialog';
+import {
+  Clock,
+  Download,
+  FolderOpen,
+  FolderPlus,
+  GitBranch,
+  Trash2,
+} from 'lucide-react';
+import { Button } from '@/components/common/Button';
+import { ScrollArea } from '@/components/common/ScrollArea';
+import { useRepoStore } from '@/stores/repoStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export function RepoSelector() {
   const { openRepository } = useRepoStore();
@@ -16,14 +23,14 @@ export function RepoSelector() {
       const selected = await open({
         directory: true,
         multiple: false,
-        title: "Select Git Repository",
+        title: 'Select Git Repository',
       } as const);
 
       if (selected) {
         await openRepository(selected);
       }
     } catch (error) {
-      console.error("Failed to open repository:", error);
+      console.error('Failed to open repository:', error);
     }
   };
 
@@ -31,7 +38,7 @@ export function RepoSelector() {
     try {
       await openRepository(path);
     } catch (error) {
-      console.error("Failed to open recent repository:", error);
+      console.error('Failed to open recent repository:', error);
       removeRecentRepo(path);
     }
   };
@@ -82,18 +89,11 @@ export function RepoSelector() {
             </div>
             <ScrollArea className="h-48 border rounded-md">
               {recentRepos.map((path) => (
-                <div
+                <button
+                  type="button"
                   key={path}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer group"
-                  role="button"
-                  tabIndex={0}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer group w-full text-left"
                   onClick={() => handleOpenRecent(path)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleOpenRecent(path);
-                    }
-                  }}
                 >
                   <FolderOpen className="h-4 w-4 text-muted-foreground" />
                   <span className="flex-1 text-sm truncate">{path}</span>
@@ -108,7 +108,7 @@ export function RepoSelector() {
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
-                </div>
+                </button>
               ))}
             </ScrollArea>
           </div>

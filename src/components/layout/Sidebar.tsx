@@ -1,18 +1,19 @@
-import React, { useState } from "react";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { Button } from "@/components/common/Button";
-import { ScrollArea } from "@/components/common/ScrollArea";
-import { cn, getStatusColor, getStatusIcon, getFileName } from "@/lib/utils";
-import type { FileStatus } from "@/lib/types";
 import {
+  Check,
   ChevronDown,
   ChevronRight,
-  Plus,
   Minus,
+  Plus,
   RotateCcw,
-  Check,
-} from "lucide-react";
+} from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import { Button } from '@/components/common/Button';
+import { ScrollArea } from '@/components/common/ScrollArea';
+import type { FileStatus } from '@/lib/types';
+import { cn, getFileName, getStatusColor, getStatusIcon } from '@/lib/utils';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 interface FileItemProps {
   file: FileStatus;
@@ -34,27 +35,30 @@ function FileItem({
   onDiscard,
 }: FileItemProps) {
   return (
-    <div
+    <button
+      type="button"
       className={cn(
-        "group flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm",
-        isSelected && "bg-accent"
+        'group flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm w-full text-left',
+        isSelected && 'bg-accent',
       )}
-      role="button"
-      tabIndex={0}
       onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect();
-        }
-      }}
     >
-      <span className={cn("w-4 text-center font-mono text-xs", getStatusColor(file.status))}>
+      <span
+        className={cn(
+          'w-4 text-center font-mono text-xs',
+          getStatusColor(file.status),
+        )}
+      >
         {getStatusIcon(file.status)}
       </span>
       <span className="flex-1 truncate text-sm">{getFileName(file.path)}</span>
-      <span className="text-xs text-muted-foreground truncate max-w-[100px]" title={file.path}>
-        {file.path.includes("/") ? file.path.split("/").slice(0, -1).join("/") : ""}
+      <span
+        className="text-xs text-muted-foreground truncate max-w-[100px]"
+        title={file.path}
+      >
+        {file.path.includes('/')
+          ? file.path.split('/').slice(0, -1).join('/')
+          : ''}
       </span>
       <div className="hidden group-hover:flex items-center gap-1">
         {isStaged ? (
@@ -104,7 +108,7 @@ function FileItem({
           </>
         )}
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -116,7 +120,13 @@ interface FileSectionProps {
   onUnstageAll?: () => void;
 }
 
-function FileSection({ title, files, isStaged, onStageAll, onUnstageAll }: FileSectionProps) {
+function FileSection({
+  title,
+  files,
+  isStaged,
+  onStageAll,
+  onUnstageAll,
+}: FileSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const { selectedFilePath, isSelectedFileStaged, selectFile } = useUiStore();
   const { stageFile, unstageFile, discardChanges } = useRepoStore();
@@ -125,17 +135,10 @@ function FileSection({ title, files, isStaged, onStageAll, onUnstageAll }: FileS
 
   return (
     <div className="mb-2">
-      <div
-        className="flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm"
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
+        className="flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm w-full text-left"
         onClick={() => setIsExpanded(!isExpanded)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setIsExpanded(!isExpanded);
-          }
-        }}
       >
         {isExpanded ? (
           <ChevronDown className="h-4 w-4" />
@@ -173,14 +176,17 @@ function FileSection({ title, files, isStaged, onStageAll, onUnstageAll }: FileS
             <Plus className="h-3 w-3" />
           </Button>
         )}
-      </div>
+      </button>
       {isExpanded && (
         <div className="ml-2">
           {files.map((file) => (
             <FileItem
               key={file.path}
               file={file}
-              isSelected={selectedFilePath === file.path && isSelectedFileStaged === isStaged}
+              isSelected={
+                selectedFilePath === file.path &&
+                isSelectedFileStaged === isStaged
+              }
               isStaged={isStaged}
               onSelect={() => selectFile(file, isStaged)}
               onStage={() => stageFile(file.path)}
@@ -200,17 +206,17 @@ interface CommitBoxProps {
 }
 
 function CommitBox({ onCommit, disabled }: CommitBoxProps) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
 
   const handleCommit = () => {
     if (message.trim()) {
       onCommit(message.trim());
-      setMessage("");
+      setMessage('');
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       handleCommit();
     }
   };
@@ -240,7 +246,10 @@ export function Sidebar() {
   const { status, stageAll, unstageAll, createCommit } = useRepoStore();
 
   const stagedFiles = status?.staged || [];
-  const unstagedFiles = [...(status?.unstaged || []), ...(status?.untracked || [])];
+  const unstagedFiles = [
+    ...(status?.unstaged || []),
+    ...(status?.untracked || []),
+  ];
   const conflictedFiles = status?.conflicted || [];
 
   const hasStaged = stagedFiles.length > 0;

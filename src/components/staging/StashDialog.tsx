@@ -1,9 +1,6 @@
-import { useState } from "react";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { Button } from "@/components/common/Button";
-import { Input } from "@/components/common/Input";
-import { ScrollArea } from "@/components/common/ScrollArea";
+import { Archive, Copy, Play, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/common/Button';
 import {
   Dialog,
   DialogContent,
@@ -11,17 +8,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/common/Dialog";
-import { Archive, Play, Trash2, Copy } from "lucide-react";
+} from '@/components/common/Dialog';
+import { Input } from '@/components/common/Input';
+import { ScrollArea } from '@/components/common/ScrollArea';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export function StashDialog() {
-  const { stashes, stashSave, stashPop, stashApply, stashDrop } = useRepoStore();
+  const { stashes, stashSave, stashPop, stashApply, stashDrop } =
+    useRepoStore();
   const { isStashDialogOpen, closeStashDialog } = useUiStore();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
 
   const handleSave = async () => {
     await stashSave(message || undefined);
-    setMessage("");
+    setMessage('');
   };
 
   return (
@@ -35,24 +36,27 @@ export function StashDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">New Stash</label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Optional message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={handleSave}>
-                <Archive className="h-4 w-4 mr-2" />
-                Save
-              </Button>
-            </div>
+            <label htmlFor="stash-message" className="text-sm font-medium">
+              New Stash
+              <div className="flex gap-2">
+                <Input
+                  id="stash-message"
+                  placeholder="Optional message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="flex-1"
+                />
+                <Button onClick={handleSave}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
+              </div>
+            </label>
           </div>
 
           {stashes.length > 0 && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Saved Stashes</label>
+              <span className="text-sm font-medium">Saved Stashes</span>
               <ScrollArea className="h-48 border rounded-md">
                 {stashes.map((stash) => (
                   <div
@@ -60,7 +64,7 @@ export function StashDialog() {
                     className="flex items-center gap-2 px-3 py-2 hover:bg-accent group"
                   >
                     <span className="text-xs text-muted-foreground font-mono">
-                      stash@{"{" + stash.index + "}"}
+                      stash@{`{${stash.index}}`}
                     </span>
                     <span className="flex-1 text-sm truncate">
                       {stash.message}

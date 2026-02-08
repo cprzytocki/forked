@@ -1,4 +1,4 @@
-import { useUiStore } from "@/stores/uiStore";
+import { useUiStore } from '@/stores/uiStore';
 
 export function useDiff() {
   const {

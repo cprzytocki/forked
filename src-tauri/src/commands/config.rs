@@ -12,7 +12,10 @@ pub struct GitConfig {
 #[tauri::command]
 pub fn get_git_config(state: State<AppState>) -> Result<GitConfig, GitClientError> {
     let guard = state.repo.lock();
-    let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_ref()
+        .ok_or(GitClientError::NoRepository)?;
 
     let config = repo.config()?;
 
@@ -32,7 +35,10 @@ pub fn set_git_config(
     state: State<AppState>,
 ) -> Result<(), GitClientError> {
     let guard = state.repo.lock();
-    let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_ref()
+        .ok_or(GitClientError::NoRepository)?;
 
     let mut config = repo.config()?;
     config.set_str(&key, &value)?;

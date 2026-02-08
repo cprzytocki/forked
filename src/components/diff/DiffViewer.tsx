@@ -1,5 +1,5 @@
-import type { FileDiff, DiffHunk, DiffLine } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { DiffHunk, DiffLine, FileDiff } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 interface DiffLineProps {
   line: DiffLine;
@@ -8,33 +8,33 @@ interface DiffLineProps {
 function DiffLineComponent({ line }: DiffLineProps) {
   const getLineClass = () => {
     switch (line.origin) {
-      case "+":
-        return "bg-green-500/10 text-green-600 dark:text-green-400";
-      case "-":
-        return "bg-red-500/10 text-red-600 dark:text-red-400";
+      case '+':
+        return 'bg-green-500/10 text-green-600 dark:text-green-400';
+      case '-':
+        return 'bg-red-500/10 text-red-600 dark:text-red-400';
       default:
-        return "";
+        return '';
     }
   };
 
   const getLinePrefix = () => {
     switch (line.origin) {
-      case "+":
-        return "+";
-      case "-":
-        return "-";
+      case '+':
+        return '+';
+      case '-':
+        return '-';
       default:
-        return " ";
+        return ' ';
     }
   };
 
   return (
-    <div className={cn("flex font-mono text-xs", getLineClass())}>
+    <div className={cn('flex font-mono text-xs', getLineClass())}>
       <span className="w-12 text-right pr-2 text-muted-foreground select-none border-r">
-        {line.old_lineno || ""}
+        {line.old_lineno || ''}
       </span>
       <span className="w-12 text-right pr-2 text-muted-foreground select-none border-r">
-        {line.new_lineno || ""}
+        {line.new_lineno || ''}
       </span>
       <span className="w-4 text-center select-none">{getLinePrefix()}</span>
       <pre className="flex-1 pl-1 whitespace-pre-wrap break-all">
@@ -46,18 +46,20 @@ function DiffLineComponent({ line }: DiffLineProps) {
 
 interface HunkViewProps {
   hunk: DiffHunk;
-  index: number;
 }
 
-function HunkView({ hunk, index }: HunkViewProps) {
+function HunkView({ hunk }: HunkViewProps) {
   return (
     <div className="border-b last:border-b-0">
       <div className="bg-muted px-2 py-1 text-xs font-mono text-muted-foreground sticky top-0">
         {hunk.header.trim()}
       </div>
       <div>
-        {hunk.lines.map((line, lineIndex) => (
-          <DiffLineComponent key={`${index}-${lineIndex}`} line={line} />
+        {hunk.lines.map((line) => (
+          <DiffLineComponent
+            key={`${line.origin}-${line.old_lineno ?? 'x'}-${line.new_lineno ?? 'x'}`}
+            line={line}
+          />
         ))}
       </div>
     </div>
@@ -87,8 +89,8 @@ export function DiffViewer({ diff }: DiffViewerProps) {
 
   return (
     <div className="min-w-0">
-      {diff.hunks.map((hunk, index) => (
-        <HunkView key={index} hunk={hunk} index={index} />
+      {diff.hunks.map((hunk) => (
+        <HunkView key={hunk.header} hunk={hunk} />
       ))}
     </div>
   );

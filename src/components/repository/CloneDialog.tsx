@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { open } from "@tauri-apps/plugin-dialog";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { Button } from "@/components/common/Button";
-import { Input } from "@/components/common/Input";
+import { open } from '@tauri-apps/plugin-dialog';
+import { FolderOpen, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/common/Button';
 import {
   Dialog,
   DialogContent,
@@ -11,20 +9,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/common/Dialog";
-import { FolderOpen, Loader2 } from "lucide-react";
+} from '@/components/common/Dialog';
+import { Input } from '@/components/common/Input';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export function CloneDialog() {
   const { cloneRepository, isLoading } = useRepoStore();
   const { isCloneDialogOpen, closeCloneDialog } = useUiStore();
-  const [url, setUrl] = useState("");
-  const [path, setPath] = useState("");
+  const [url, setUrl] = useState('');
+  const [path, setPath] = useState('');
 
   const handleSelectPath = async () => {
     const selected = await open({
       directory: true,
       multiple: false,
-      title: "Select Clone Location",
+      title: 'Select Clone Location',
     } as const);
 
     if (selected) {
@@ -36,8 +36,8 @@ export function CloneDialog() {
     if (url && path) {
       await cloneRepository(url, path);
       closeCloneDialog();
-      setUrl("");
-      setPath("");
+      setUrl('');
+      setPath('');
     }
   };
 
@@ -52,26 +52,32 @@ export function CloneDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Repository URL</label>
-            <Input
-              placeholder="https://github.com/user/repo.git"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
+            <label htmlFor="clone-url" className="text-sm font-medium">
+              Repository URL
+              <Input
+                id="clone-url"
+                placeholder="https://github.com/user/repo.git"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+              />
+            </label>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Clone to</label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Select a folder..."
-                value={path}
-                onChange={(e) => setPath(e.target.value)}
-                className="flex-1"
-              />
-              <Button variant="outline" onClick={handleSelectPath}>
-                <FolderOpen className="h-4 w-4" />
-              </Button>
-            </div>
+            <label htmlFor="clone-path" className="text-sm font-medium">
+              Clone to
+              <div className="flex gap-2">
+                <Input
+                  id="clone-path"
+                  placeholder="Select a folder..."
+                  value={path}
+                  onChange={(e) => setPath(e.target.value)}
+                  className="flex-1"
+                />
+                <Button variant="outline" onClick={handleSelectPath}>
+                  <FolderOpen className="h-4 w-4" />
+                </Button>
+              </div>
+            </label>
           </div>
         </div>
         <DialogFooter>
@@ -85,7 +91,7 @@ export function CloneDialog() {
                 Cloning...
               </>
             ) : (
-              "Clone"
+              'Clone'
             )}
           </Button>
         </DialogFooter>

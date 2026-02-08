@@ -47,25 +47,20 @@ pub struct CommitGraphEntry {
     pub graph: GraphNode,
 }
 
-fn compute_graph(
-    commits: &[CommitInfo],
-    repo: &Repository,
-) -> Vec<GraphNode> {
+fn compute_graph(commits: &[CommitInfo], repo: &Repository) -> Vec<GraphNode> {
     // Collect branch names pointing at each commit
     let mut commit_branches: HashMap<String, Vec<String>> = HashMap::new();
     if let Ok(branches) = repo.branches(None) {
-        for branch_result in branches {
-            if let Ok((branch, _)) = branch_result {
-                if let (Some(name), Ok(Some(commit))) = (
-                    branch.name().ok().flatten(),
-                    branch.get().peel_to_commit().map(|c| Some(c)),
-                ) {
-                    let oid = commit.id().to_string();
-                    commit_branches
-                        .entry(oid)
-                        .or_default()
-                        .push(name.to_string());
-                }
+        for (branch, _) in branches.flatten() {
+            if let (Some(name), Ok(Some(commit))) = (
+                branch.name().ok().flatten(),
+                branch.get().peel_to_commit().map(Some),
+            ) {
+                let oid = commit.id().to_string();
+                commit_branches
+                    .entry(oid)
+                    .or_default()
+                    .push(name.to_string());
             }
         }
     }
@@ -172,21 +167,19 @@ fn compute_graph(
         // Close any duplicate lanes for the same commit (can happen with merges)
         // If multiple lanes were pointing to this commit, free the extras
         for i in 0..active_lanes.len() {
-            if i != node_lane {
-                if active_lanes[i].as_deref() == Some(commit_id.as_str()) {
-                    // This lane was also waiting for this commit; redirect to first parent or free
-                    if !commit.parent_ids.is_empty() {
-                        active_lanes[i] = Some(commit.parent_ids[0].clone());
-                        connections.push(GraphConnection {
-                            from_lane: i,
-                            to_lane: node_lane,
-                            color_index: lane_colors[i],
-                        });
-                        // Now free this lane since first parent is already in node_lane
-                        active_lanes[i] = None;
-                    } else {
-                        active_lanes[i] = None;
-                    }
+            if i != node_lane && active_lanes[i].as_deref() == Some(commit_id.as_str()) {
+                // This lane was also waiting for this commit; redirect to first parent or free
+                if !commit.parent_ids.is_empty() {
+                    active_lanes[i] = Some(commit.parent_ids[0].clone());
+                    connections.push(GraphConnection {
+                        from_lane: i,
+                        to_lane: node_lane,
+                        color_index: lane_colors[i],
+                    });
+                    // Now free this lane since first parent is already in node_lane
+                    active_lanes[i] = None;
+                } else {
+                    active_lanes[i] = None;
                 }
             }
         }
@@ -202,10 +195,7 @@ fn compute_graph(
             .map(|(lane, color_index)| PassThroughLane { lane, color_index })
             .collect();
 
-        let branch_names = commit_branches
-            .get(commit_id)
-            .cloned()
-            .unwrap_or_default();
+        let branch_names = commit_branches.get(commit_id).cloned().unwrap_or_default();
 
         nodes.push(GraphNode {
             lane: node_lane,
@@ -281,7 +271,10 @@ pub fn get_commit_history(
     Ok(commits)
 }
 
-pub fn get_commit_details(repo: &Repository, oid_str: &str) -> Result<CommitDetails, GitClientError> {
+pub fn get_commit_details(
+    repo: &Repository,
+    oid_str: &str,
+) -> Result<CommitDetails, GitClientError> {
     let oid = Oid::from_str(oid_str).map_err(|e| GitClientError::Operation(e.to_string()))?;
     let commit = repo.find_commit(oid)?;
     let commit_info = commit_to_info(&commit);
@@ -310,8 +303,14 @@ pub fn get_commit_details(repo: &Repository, oid_str: &str) -> Result<CommitDeta
                 _ => "unknown",
             };
 
-            let new_path = delta.new_file().path().map(|p| p.to_string_lossy().to_string());
-            let old_path = delta.old_file().path().map(|p| p.to_string_lossy().to_string());
+            let new_path = delta
+                .new_file()
+                .path()
+                .map(|p| p.to_string_lossy().to_string());
+            let old_path = delta
+                .old_file()
+                .path()
+                .map(|p| p.to_string_lossy().to_string());
 
             if let Some(path) = new_path {
                 files_changed.borrow_mut().push(FileChange {
@@ -371,7 +370,7 @@ pub fn get_commit_history_with_graph(
 
     let entries: Vec<CommitGraphEntry> = commits
         .into_iter()
-        .zip(graph_nodes.into_iter())
+        .zip(graph_nodes)
         .map(|(commit, graph)| CommitGraphEntry { commit, graph })
         .collect();
 

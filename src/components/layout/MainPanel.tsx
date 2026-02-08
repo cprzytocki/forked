@@ -1,11 +1,11 @@
-import { useMemo } from "react";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { ScrollArea } from "@/components/common/ScrollArea";
-import { CommitGraph } from "@/components/history/CommitGraph";
-import { cn, formatRelativeTime, getBranchColorHsl } from "@/lib/utils";
-import type { CommitInfo, CommitGraphEntry } from "@/lib/types";
-import { GitCommit, GitBranch } from "lucide-react";
+import { GitBranch, GitCommit } from 'lucide-react';
+import { useMemo } from 'react';
+import { ScrollArea } from '@/components/common/ScrollArea';
+import { CommitGraph } from '@/components/history/CommitGraph';
+import type { CommitGraphEntry, CommitInfo } from '@/lib/types';
+import { cn, formatRelativeTime, getBranchColorHsl } from '@/lib/utils';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 interface CommitItemProps {
   entry: CommitGraphEntry;
@@ -14,15 +14,21 @@ interface CommitItemProps {
   maxLanes: number;
 }
 
-function CommitItem({ entry, isSelected, onSelect, maxLanes }: CommitItemProps) {
+function CommitItem({
+  entry,
+  isSelected,
+  onSelect,
+  maxLanes,
+}: CommitItemProps) {
   const { commit, graph } = entry;
 
   return (
-    <div
+    <button
+      type="button"
       className={cn(
-        "flex items-center cursor-pointer transition-colors",
-        "hover:bg-accent/50",
-        isSelected && "bg-accent"
+        'flex items-center cursor-pointer transition-colors w-full text-left',
+        'hover:bg-accent/50',
+        isSelected && 'bg-accent',
       )}
       onClick={onSelect}
     >
@@ -40,13 +46,15 @@ function CommitItem({ entry, isSelected, onSelect, maxLanes }: CommitItemProps) 
             className="branch-badge"
             style={{
               backgroundColor: `${getBranchColorHsl(graph.color_index)}`,
-              color: "white",
+              color: 'white',
             }}
           >
             {name}
           </span>
         ))}
-        <span className="text-[13px] font-medium truncate">{commit.summary}</span>
+        <span className="text-[13px] font-medium truncate">
+          {commit.summary}
+        </span>
       </div>
 
       {/* Author column */}
@@ -63,12 +71,13 @@ function CommitItem({ entry, isSelected, onSelect, maxLanes }: CommitItemProps) 
       <div className="flex-shrink-0 w-[100px] px-2 pr-3 text-xs text-muted-foreground text-right">
         {formatRelativeTime(commit.time)}
       </div>
-    </div>
+    </button>
   );
 }
 
 export function MainPanel() {
-  const { commits, selectedCommit, selectCommit, currentBranch } = useRepoStore();
+  const { commits, selectedCommit, selectCommit, currentBranch } =
+    useRepoStore();
   const { loadCommitDiff } = useUiStore();
 
   const maxLanes = useMemo(() => {
@@ -96,7 +105,9 @@ export function MainPanel() {
       {/* Header */}
       <div className="p-2 border-b flex items-center gap-2">
         <GitBranch className="h-4 w-4" />
-        <span className="font-semibold text-sm">{currentBranch || "No branch"}</span>
+        <span className="font-semibold text-sm">
+          {currentBranch || 'No branch'}
+        </span>
         <span className="text-xs text-muted-foreground ml-auto">
           {commits.length} commits
         </span>
@@ -105,11 +116,16 @@ export function MainPanel() {
       {/* Column headers */}
       {commits.length > 0 && (
         <div className="flex items-center border-b bg-muted/30 text-[11px] text-muted-foreground uppercase tracking-wider font-medium select-none">
-          <div className="flex-shrink-0" style={{ width: Math.max((maxLanes + 1) * 16, 48) }} />
+          <div
+            className="flex-shrink-0"
+            style={{ width: Math.max((maxLanes + 1) * 16, 48) }}
+          />
           <div className="flex-1 min-w-0 px-2 py-1">Description</div>
           <div className="flex-shrink-0 w-[120px] px-2 py-1">Author</div>
           <div className="flex-shrink-0 w-[70px] px-2 py-1">Hash</div>
-          <div className="flex-shrink-0 w-[100px] px-2 pr-3 py-1 text-right">Date</div>
+          <div className="flex-shrink-0 w-[100px] px-2 pr-3 py-1 text-right">
+            Date
+          </div>
         </div>
       )}
 

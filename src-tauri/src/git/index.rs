@@ -40,11 +40,7 @@ pub fn unstage_all(repo: &Repository) -> Result<(), GitClientError> {
     let head = repo.head()?;
     let head_commit = head.peel_to_commit()?;
 
-    repo.reset(
-        &head_commit.into_object(),
-        git2::ResetType::Mixed,
-        None,
-    )?;
+    repo.reset(&head_commit.into_object(), git2::ResetType::Mixed, None)?;
 
     Ok(())
 }

@@ -14,7 +14,10 @@ pub struct StashEntry {
 #[tauri::command]
 pub fn stash_save(message: Option<String>, state: State<AppState>) -> Result<(), GitClientError> {
     let mut guard = state.repo.lock();
-    let repo = guard.repository.as_mut().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_mut()
+        .ok_or(GitClientError::NoRepository)?;
 
     let signature = repo.signature()?;
     let msg = message.as_deref();
@@ -27,7 +30,10 @@ pub fn stash_save(message: Option<String>, state: State<AppState>) -> Result<(),
 #[tauri::command]
 pub fn stash_pop(index: usize, state: State<AppState>) -> Result<(), GitClientError> {
     let mut guard = state.repo.lock();
-    let repo = guard.repository.as_mut().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_mut()
+        .ok_or(GitClientError::NoRepository)?;
 
     repo.stash_pop(index, None)?;
 
@@ -37,7 +43,10 @@ pub fn stash_pop(index: usize, state: State<AppState>) -> Result<(), GitClientEr
 #[tauri::command]
 pub fn stash_apply(index: usize, state: State<AppState>) -> Result<(), GitClientError> {
     let mut guard = state.repo.lock();
-    let repo = guard.repository.as_mut().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_mut()
+        .ok_or(GitClientError::NoRepository)?;
 
     repo.stash_apply(index, None)?;
 
@@ -47,7 +56,10 @@ pub fn stash_apply(index: usize, state: State<AppState>) -> Result<(), GitClient
 #[tauri::command]
 pub fn stash_drop(index: usize, state: State<AppState>) -> Result<(), GitClientError> {
     let mut guard = state.repo.lock();
-    let repo = guard.repository.as_mut().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_mut()
+        .ok_or(GitClientError::NoRepository)?;
 
     repo.stash_drop(index)?;
 
@@ -57,7 +69,10 @@ pub fn stash_drop(index: usize, state: State<AppState>) -> Result<(), GitClientE
 #[tauri::command]
 pub fn stash_list(state: State<AppState>) -> Result<Vec<StashEntry>, GitClientError> {
     let mut guard = state.repo.lock();
-    let repo = guard.repository.as_mut().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_mut()
+        .ok_or(GitClientError::NoRepository)?;
 
     let mut stashes = Vec::new();
 

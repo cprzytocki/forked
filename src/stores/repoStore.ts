@@ -1,14 +1,14 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import * as tauri from '@/lib/tauri';
 import type {
+  BranchInfo,
+  CommitGraphEntry,
+  CommitInfo,
+  RemoteInfo,
   RepoInfo,
   RepoStatus,
-  CommitInfo,
-  CommitGraphEntry,
-  BranchInfo,
-  RemoteInfo,
   StashEntry,
-} from "@/lib/types";
-import * as tauri from "@/lib/tauri";
+} from '@/lib/types';
 
 //test
 interface RepoState {
@@ -154,7 +154,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     try {
       const commits = await tauri.getCommitHistoryWithGraph(limit);
       set({ commits });
-    } catch (e) {
+    } catch (_e) {
       // Empty repo might not have commits
       set({ commits: [] });
     }
@@ -174,7 +174,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     try {
       const remotes = await tauri.listRemotes();
       set({ remotes });
-    } catch (e) {
+    } catch (_e) {
       set({ remotes: [] });
     }
   },
@@ -183,7 +183,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     try {
       const stashes = await tauri.stashList();
       set({ stashes });
-    } catch (e) {
+    } catch (_e) {
       set({ stashes: [] });
     }
   },

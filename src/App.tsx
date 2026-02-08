@@ -1,32 +1,37 @@
-import { useEffect, useCallback, useRef } from "react";
-import { listen } from "@tauri-apps/api/event";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { MainPanel } from "@/components/layout/MainPanel";
-import { DetailsPanel } from "@/components/layout/DetailsPanel";
-import { BranchList } from "@/components/branch/BranchList";
-import { RepoSelector } from "@/components/repository/RepoSelector";
-import { CloneDialog } from "@/components/repository/CloneDialog";
-import { InitDialog } from "@/components/repository/InitDialog";
-import { CreateBranchDialog } from "@/components/branch/CreateBranchDialog";
-import { StashDialog } from "@/components/staging/StashDialog";
+import { listen } from '@tauri-apps/api/event';
+import { useCallback, useEffect, useRef } from 'react';
+import { BranchList } from '@/components/branch/BranchList';
+import { CreateBranchDialog } from '@/components/branch/CreateBranchDialog';
+import { DetailsPanel } from '@/components/layout/DetailsPanel';
+import { Header } from '@/components/layout/Header';
+import { MainPanel } from '@/components/layout/MainPanel';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { CloneDialog } from '@/components/repository/CloneDialog';
+import { InitDialog } from '@/components/repository/InitDialog';
+import { RepoSelector } from '@/components/repository/RepoSelector';
+import { StashDialog } from '@/components/staging/StashDialog';
+import { useRepoStore } from '@/stores/repoStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useUiStore } from '@/stores/uiStore';
 
 function App() {
   const { repoInfo, error, clearError } = useRepoStore();
   const { theme, viewMode, detailView, isDiffLoading } = useUiStore();
-  const { addRecentRepo, sidebarWidth, detailsPanelHeight, setDetailsPanelHeight } = useSettingsStore();
+  const {
+    addRecentRepo,
+    sidebarWidth,
+    detailsPanelHeight,
+    setDetailsPanelHeight,
+  } = useSettingsStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
-  const showDetailsPanel = detailView !== "none" || isDiffLoading;
+  const showDetailsPanel = detailView !== 'none' || isDiffLoading;
 
   // Initialize theme
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
   // Add to recent repos when opening
@@ -39,7 +44,7 @@ function App() {
   // Show error toast
   useEffect(() => {
     if (error) {
-      console.error("Git Client Error:", error);
+      console.error('Git Client Error:', error);
       const timeout = setTimeout(() => clearError(), 5000);
       return () => clearTimeout(timeout);
     }
@@ -50,7 +55,7 @@ function App() {
     if (!repoInfo) return;
 
     let throttleTimer: ReturnType<typeof setTimeout> | null = null;
-    const unlisten = listen("repo-changed", () => {
+    const unlisten = listen('repo-changed', () => {
       if (throttleTimer) return;
       throttleTimer = setTimeout(() => {
         throttleTimer = null;
@@ -67,8 +72,8 @@ function App() {
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     isDragging.current = true;
-    document.body.style.cursor = "row-resize";
-    document.body.style.userSelect = "none";
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
   }, []);
 
   useEffect(() => {
@@ -83,16 +88,16 @@ function App() {
     const handleMouseUp = () => {
       if (isDragging.current) {
         isDragging.current = false;
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [setDetailsPanelHeight]);
 
@@ -103,10 +108,7 @@ function App() {
       {error && (
         <div className="bg-destructive text-destructive-foreground px-4 py-2 text-sm">
           {error}
-          <button
-            className="ml-4 underline"
-            onClick={clearError}
-          >
+          <button type="button" className="ml-4 underline" onClick={clearError}>
             Dismiss
           </button>
         </div>
@@ -123,19 +125,19 @@ function App() {
             </div>
 
             {/* Main content area - vertical split */}
-            <div ref={containerRef} className="flex-1 flex flex-col overflow-hidden">
+            <div
+              ref={containerRef}
+              className="flex-1 flex flex-col overflow-hidden"
+            >
               {/* Top panel - History or Branches */}
               <div className="flex-1 min-h-0 overflow-hidden">
-                {viewMode === "branches" ? (
-                  <BranchList />
-                ) : (
-                  <MainPanel />
-                )}
+                {viewMode === 'branches' ? <BranchList /> : <MainPanel />}
               </div>
 
               {/* Draggable divider + Details panel */}
               {showDetailsPanel && (
                 <>
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: resize drag handle */}
                   <div
                     className="flex-shrink-0 h-1 cursor-row-resize bg-border hover:bg-primary/50 transition-colors"
                     onMouseDown={handleMouseDown}

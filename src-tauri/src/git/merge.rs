@@ -24,7 +24,9 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
     let mut branches = Vec::new();
 
     let head = repo.head().ok();
-    let head_name = head.as_ref().and_then(|h| h.shorthand().map(|s| s.to_string()));
+    let head_name = head
+        .as_ref()
+        .and_then(|h| h.shorthand().map(|s| s.to_string()));
 
     for branch_result in repo.branches(None)? {
         let (branch, branch_type) = branch_result?;
@@ -61,10 +63,12 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
             std::cmp::Ordering::Less
         } else if !a.is_head && b.is_head {
             std::cmp::Ordering::Greater
-        } else if a.is_remote && !b.is_remote {
-            std::cmp::Ordering::Greater
-        } else if !a.is_remote && b.is_remote {
-            std::cmp::Ordering::Less
+        } else if a.is_remote != b.is_remote {
+            if a.is_remote {
+                std::cmp::Ordering::Greater
+            } else {
+                std::cmp::Ordering::Less
+            }
         } else {
             a.name.cmp(&b.name)
         }
@@ -95,10 +99,9 @@ pub fn checkout_branch(repo: &Repository, name: &str) -> Result<(), GitClientErr
     repo.checkout_tree(&object, None)?;
 
     match reference {
-        Some(gref) => repo.set_head(
-            gref.name()
-                .ok_or_else(|| GitClientError::Operation("Reference name is not valid UTF-8".into()))?,
-        )?,
+        Some(gref) => repo.set_head(gref.name().ok_or_else(|| {
+            GitClientError::Operation("Reference name is not valid UTF-8".into())
+        })?)?,
         None => repo.set_head_detached(object.id())?,
     }
 

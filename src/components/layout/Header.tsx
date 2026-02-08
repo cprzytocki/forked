@@ -1,17 +1,17 @@
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { Button } from "@/components/common/Button";
 import {
-  GitBranch,
-  RefreshCw,
-  Download,
-  Upload,
-  FolderOpen,
-  Moon,
-  Sun,
   Archive,
+  Download,
+  FolderOpen,
+  GitBranch,
   Loader2,
-} from "lucide-react";
+  Moon,
+  RefreshCw,
+  Sun,
+  Upload,
+} from 'lucide-react';
+import { Button } from '@/components/common/Button';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export function Header() {
   const {
@@ -26,7 +26,7 @@ export function Header() {
   } = useRepoStore();
   const { theme, toggleTheme, openStashDialog } = useUiStore();
 
-  const defaultRemote = remotes[0]?.name || "origin";
+  const defaultRemote = remotes[0]?.name || 'origin';
 
   const handleFetch = async () => {
     await fetch(defaultRemote);
@@ -48,9 +48,7 @@ export function Header() {
     <header className="h-12 border-b flex items-center px-4 gap-4 bg-background">
       <div className="flex items-center gap-2">
         <GitBranch className="h-5 w-5 text-primary" />
-        <span className="font-semibold">
-          {repoInfo?.name || "Git Client"}
-        </span>
+        <span className="font-semibold">{repoInfo?.name || 'Git Client'}</span>
       </div>
 
       {repoInfo && (
@@ -127,7 +125,7 @@ export function Header() {
           title="Toggle theme"
           aria-label="Toggle theme"
         >
-          {theme === "dark" ? (
+          {theme === 'dark' ? (
             <Sun className="h-4 w-4" />
           ) : (
             <Moon className="h-4 w-4" />
