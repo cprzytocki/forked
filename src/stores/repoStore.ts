@@ -21,6 +21,8 @@ interface RepoState {
   // Commits
   commits: CommitGraphEntry[];
   selectedCommit: CommitInfo | null;
+  hasMoreCommits: boolean;
+  isLoadingMoreCommits: boolean;
 
   // Branches
   branches: BranchInfo[];
@@ -39,6 +41,7 @@ interface RepoState {
   closeRepository: () => void;
   refreshStatus: () => Promise<void>;
   refreshCommits: (limit?: number) => Promise<void>;
+  loadMoreCommits: () => Promise<void>;
   refreshBranches: () => Promise<void>;
   refreshRemotes: () => Promise<void>;
   refreshStashes: () => Promise<void>;
@@ -83,6 +86,8 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   error: null,
   commits: [],
   selectedCommit: null,
+  hasMoreCommits: true,
+  isLoadingMoreCommits: false,
   branches: [],
   currentBranch: null,
   remotes: [],
@@ -134,6 +139,8 @@ export const useRepoStore = create<RepoState>((set, get) => ({
       status: null,
       commits: [],
       selectedCommit: null,
+      hasMoreCommits: true,
+      isLoadingMoreCommits: false,
       branches: [],
       currentBranch: null,
       remotes: [],
@@ -153,10 +160,29 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   refreshCommits: async (limit = 50) => {
     try {
       const commits = await tauri.getCommitHistoryWithGraph(limit);
-      set({ commits });
+      set({ commits, hasMoreCommits: commits.length >= limit });
     } catch (_e) {
       // Empty repo might not have commits
-      set({ commits: [] });
+      set({ commits: [], hasMoreCommits: false });
+    }
+  },
+
+  loadMoreCommits: async () => {
+    const { commits, hasMoreCommits, isLoadingMoreCommits } = get();
+    if (!hasMoreCommits || isLoadingMoreCommits) return;
+
+    const pageSize = 50;
+    const newLimit = commits.length + pageSize;
+    set({ isLoadingMoreCommits: true });
+    try {
+      const result = await tauri.getCommitHistoryWithGraph(newLimit);
+      set({
+        commits: result,
+        hasMoreCommits: result.length >= newLimit,
+        isLoadingMoreCommits: false,
+      });
+    } catch (_e) {
+      set({ isLoadingMoreCommits: false });
     }
   },
 
