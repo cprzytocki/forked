@@ -14,9 +14,7 @@ fn should_emit_for_path(path: &Path, repo_root: &Path) -> bool {
     let git_dir = repo_root.join(".git");
     if let Ok(relative) = path.strip_prefix(&git_dir) {
         let rel_str = relative.to_string_lossy();
-        rel_str.starts_with("HEAD")
-            || rel_str.starts_with("refs")
-            || rel_str == "index"
+        rel_str.starts_with("HEAD") || rel_str.starts_with("refs") || rel_str == "index"
     } else {
         // Outside .git/ — always emit
         true

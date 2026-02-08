@@ -1,9 +1,9 @@
-import { create } from "zustand";
-import type { FileStatus, FileDiff, CommitDiff } from "@/lib/types";
-import * as tauri from "@/lib/tauri";
+import { create } from 'zustand';
+import * as tauri from '@/lib/tauri';
+import type { CommitDiff, FileDiff, FileStatus } from '@/lib/types';
 
-export type ViewMode = "changes" | "history" | "branches";
-export type DetailView = "diff" | "commit" | "none";
+export type ViewMode = 'changes' | 'history' | 'branches';
+export type DetailView = 'diff' | 'commit' | 'none';
 
 interface UiState {
   // View state
@@ -28,7 +28,7 @@ interface UiState {
   isStashDialogOpen: boolean;
 
   // Theme
-  theme: "light" | "dark";
+  theme: 'light' | 'dark';
 
   // Actions
   setViewMode: (mode: ViewMode) => void;
@@ -52,12 +52,12 @@ interface UiState {
 
   // Theme
   toggleTheme: () => void;
-  setTheme: (theme: "light" | "dark") => void;
+  setTheme: (theme: 'light' | 'dark') => void;
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
-  viewMode: "changes",
-  detailView: "none",
+  viewMode: 'changes',
+  detailView: 'none',
   selectedFile: null,
   selectedFilePath: null,
   isSelectedFileStaged: false,
@@ -69,7 +69,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   isCreateBranchDialogOpen: false,
   isMergeDialogOpen: false,
   isStashDialogOpen: false,
-  theme: "dark",
+  theme: 'dark',
 
   setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
   setDetailView: (view: DetailView) => set({ detailView: view }),
@@ -79,7 +79,7 @@ export const useUiStore = create<UiState>((set, get) => ({
       selectedFile: file,
       selectedFilePath: file?.path || null,
       isSelectedFileStaged: staged,
-      detailView: file ? "diff" : "none",
+      detailView: file ? 'diff' : 'none',
     });
     if (file) {
       get().loadFileDiff(file.path, staged);
@@ -94,7 +94,7 @@ export const useUiStore = create<UiState>((set, get) => ({
       const diff = await tauri.getFileDiff(path, staged);
       set({ currentFileDiff: diff, currentCommitDiff: null });
     } catch (e) {
-      console.error("Failed to load diff:", e);
+      console.error('Failed to load diff:', e);
       set({ currentFileDiff: null });
     } finally {
       set({ isDiffLoading: false });
@@ -102,24 +102,25 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
 
   loadCommitDiff: async (oid: string) => {
-    set({ isDiffLoading: true, detailView: "commit" });
+    set({ isDiffLoading: true, detailView: 'commit' });
     try {
       const diff = await tauri.getCommitDiff(oid);
       set({ currentCommitDiff: diff, currentFileDiff: null });
     } catch (e) {
-      console.error("Failed to load commit diff:", e);
+      console.error('Failed to load commit diff:', e);
       set({ currentCommitDiff: null });
     } finally {
       set({ isDiffLoading: false });
     }
   },
 
-  clearDiff: () => set({
-    currentFileDiff: null,
-    currentCommitDiff: null,
-    selectedFile: null,
-    selectedFilePath: null,
-  }),
+  clearDiff: () =>
+    set({
+      currentFileDiff: null,
+      currentCommitDiff: null,
+      selectedFile: null,
+      selectedFilePath: null,
+    }),
 
   openCloneDialog: () => set({ isCloneDialogOpen: true }),
   closeCloneDialog: () => set({ isCloneDialogOpen: false }),
@@ -133,13 +134,13 @@ export const useUiStore = create<UiState>((set, get) => ({
   closeStashDialog: () => set({ isStashDialogOpen: false }),
 
   toggleTheme: () => {
-    const newTheme = get().theme === "light" ? "dark" : "light";
+    const newTheme = get().theme === 'light' ? 'dark' : 'light';
     set({ theme: newTheme });
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
   },
 
-  setTheme: (theme: "light" | "dark") => {
+  setTheme: (theme: 'light' | 'dark') => {
     set({ theme });
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle('dark', theme === 'dark');
   },
 }));

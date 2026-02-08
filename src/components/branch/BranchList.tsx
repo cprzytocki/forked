@@ -1,17 +1,10 @@
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { Button } from "@/components/common/Button";
-import { ScrollArea } from "@/components/common/ScrollArea";
-import { cn } from "@/lib/utils";
-import type { BranchInfo } from "@/lib/types";
-import {
-  GitBranch,
-  Plus,
-  Trash2,
-  Check,
-  Cloud,
-  GitMerge,
-} from "lucide-react";
+import { Check, Cloud, GitBranch, GitMerge, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/common/Button';
+import { ScrollArea } from '@/components/common/ScrollArea';
+import type { BranchInfo } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 interface BranchItemProps {
   branch: BranchInfo;
@@ -20,22 +13,20 @@ interface BranchItemProps {
   onMerge: () => void;
 }
 
-function BranchItem({ branch, onCheckout, onDelete, onMerge }: BranchItemProps) {
+function BranchItem({
+  branch,
+  onCheckout,
+  onDelete,
+  onMerge,
+}: BranchItemProps) {
   return (
-    <div
+    <button
+      type="button"
       className={cn(
-        "group flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer",
-        branch.is_head && "bg-accent"
+        'group flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer w-full text-left',
+        branch.is_head && 'bg-accent',
       )}
-      role="button"
-      tabIndex={0}
       onClick={onCheckout}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onCheckout();
-        }
-      }}
     >
       {branch.is_remote ? (
         <Cloud className="h-4 w-4 text-muted-foreground" />
@@ -43,9 +34,7 @@ function BranchItem({ branch, onCheckout, onDelete, onMerge }: BranchItemProps) 
         <GitBranch className="h-4 w-4 text-muted-foreground" />
       )}
       <span className="flex-1 text-sm truncate">{branch.name}</span>
-      {branch.is_head && (
-        <Check className="h-4 w-4 text-green-500" />
-      )}
+      {branch.is_head && <Check className="h-4 w-4 text-green-500" />}
       {!branch.is_head && !branch.is_remote && (
         <div className="hidden group-hover:flex items-center gap-1">
           <Button
@@ -76,12 +65,13 @@ function BranchItem({ branch, onCheckout, onDelete, onMerge }: BranchItemProps) 
           </Button>
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
 export function BranchList() {
-  const { branches, checkoutBranch, deleteBranch, mergeBranch } = useRepoStore();
+  const { branches, checkoutBranch, deleteBranch, mergeBranch } =
+    useRepoStore();
   const { openCreateBranchDialog } = useUiStore();
 
   const localBranches = branches.filter((b) => !b.is_remote);

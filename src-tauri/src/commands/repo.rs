@@ -59,14 +59,20 @@ pub fn clone_repository(
 #[tauri::command]
 pub fn get_status(state: State<AppState>) -> Result<RepoStatus, GitClientError> {
     let guard = state.repo.lock();
-    let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_ref()
+        .ok_or(GitClientError::NoRepository)?;
     git::get_status(repo)
 }
 
 #[tauri::command]
 pub fn get_repo_info(state: State<AppState>) -> Result<RepoInfo, GitClientError> {
     let guard = state.repo.lock();
-    let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;
+    let repo = guard
+        .repository
+        .as_ref()
+        .ok_or(GitClientError::NoRepository)?;
     git::get_repo_info(repo)
 }
 
@@ -80,5 +86,7 @@ pub fn close_repository(state: State<AppState>) -> Result<(), GitClientError> {
 
 #[tauri::command]
 pub fn get_current_repo_path(state: State<AppState>) -> Result<Option<String>, GitClientError> {
-    Ok(state.get_repo_path().map(|p| p.to_string_lossy().to_string()))
+    Ok(state
+        .get_repo_path()
+        .map(|p| p.to_string_lossy().to_string()))
 }

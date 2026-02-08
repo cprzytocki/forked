@@ -1,5 +1,5 @@
-import type { GraphNode } from "@/lib/types";
-import { getBranchColorHsl } from "@/lib/utils";
+import type { GraphNode } from '@/lib/types';
+import { getBranchColorHsl } from '@/lib/utils';
 
 const LANE_WIDTH = 16;
 const NODE_RADIUS = 4;
@@ -23,6 +23,7 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
       height={ROW_HEIGHT}
       className="flex-shrink-0"
       style={{ minWidth: width }}
+      aria-hidden="true"
     >
       {/* Draw pass-through lane lines (behind everything) */}
       {node.pass_through_lanes.map((pt) => {
@@ -42,16 +43,17 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
       })}
 
       {/* Draw connections to parents */}
-      {node.connections_to_parents.map((conn, i) => {
+      {node.connections_to_parents.map((conn) => {
         const fromX = conn.from_lane * LANE_WIDTH + LANE_WIDTH / 2;
         const toX = conn.to_lane * LANE_WIDTH + LANE_WIDTH / 2;
         const connColor = getBranchColorHsl(conn.color_index);
+        const connKey = `conn-${conn.from_lane}-${conn.to_lane}`;
 
         if (fromX === toX) {
           // Straight vertical line
           return (
             <line
-              key={i}
+              key={connKey}
               x1={fromX}
               y1={centerY}
               x2={toX}
@@ -67,7 +69,7 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
             const midY = centerY + (ROW_HEIGHT - centerY) * 0.5;
             return (
               <path
-                key={i}
+                key={connKey}
                 d={`M ${fromX} ${centerY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${ROW_HEIGHT}`}
                 fill="none"
                 stroke={connColor}
@@ -79,7 +81,7 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
             const midY = centerY * 0.5;
             return (
               <path
-                key={i}
+                key={connKey}
                 d={`M ${fromX} ${0} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${centerY}`}
                 fill="none"
                 stroke={connColor}
@@ -111,12 +113,7 @@ export function CommitGraph({ node, maxLanes }: CommitGraphProps) {
           strokeWidth={2.5}
         />
       ) : (
-        <circle
-          cx={nodeX}
-          cy={centerY}
-          r={NODE_RADIUS}
-          fill={color}
-        />
+        <circle cx={nodeX} cy={centerY} r={NODE_RADIUS} fill={color} />
       )}
     </svg>
   );

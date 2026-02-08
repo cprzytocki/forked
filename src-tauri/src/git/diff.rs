@@ -83,7 +83,10 @@ pub fn get_file_diff(
                 git2::Delta::Copied => "copied".to_string(),
                 _ => "unknown".to_string(),
             };
-            fd.old_path = delta.old_file().path().map(|p| p.to_string_lossy().to_string());
+            fd.old_path = delta
+                .old_file()
+                .path()
+                .map(|p| p.to_string_lossy().to_string());
             fd.is_binary = delta.new_file().is_binary() || delta.old_file().is_binary();
             true
         },
@@ -168,7 +171,10 @@ pub fn get_commit_diff(repo: &Repository, oid_str: &str) -> Result<CommitDiff, G
 
             *cf = Some(FileDiff {
                 path,
-                old_path: delta.old_file().path().map(|p| p.to_string_lossy().to_string()),
+                old_path: delta
+                    .old_file()
+                    .path()
+                    .map(|p| p.to_string_lossy().to_string()),
                 status: match delta.status() {
                     git2::Delta::Added => "added".to_string(),
                     git2::Delta::Deleted => "deleted".to_string(),

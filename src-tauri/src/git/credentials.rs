@@ -10,11 +10,7 @@ pub fn get_callbacks<'a>() -> RemoteCallbacks<'a> {
             Cred::ssh_key_from_agent(user)
         } else if allowed.contains(git2::CredentialType::USER_PASS_PLAINTEXT) {
             // Fallback to credential helper or default
-            Cred::credential_helper(
-                &git2::Config::open_default()?,
-                _url,
-                username,
-            )
+            Cred::credential_helper(&git2::Config::open_default()?, _url, username)
         } else if allowed.contains(git2::CredentialType::DEFAULT) {
             Cred::default()
         } else {
@@ -47,10 +43,7 @@ pub fn get_push_options<'a>() -> PushOptions<'a> {
     push_opts
 }
 
-pub fn fetch_remote(
-    repo: &git2::Repository,
-    remote_name: &str,
-) -> Result<(), git2::Error> {
+pub fn fetch_remote(repo: &git2::Repository, remote_name: &str) -> Result<(), git2::Error> {
     let mut remote = repo.find_remote(remote_name)?;
     let refspecs: Vec<String> = remote
         .fetch_refspecs()?
@@ -151,7 +144,10 @@ pub fn pull_remote(
         Some("HEAD"),
         &signature,
         &signature,
-        &format!("Merge remote-tracking branch '{}/{}'", remote_name, branch_name),
+        &format!(
+            "Merge remote-tracking branch '{}/{}'",
+            remote_name, branch_name
+        ),
         &tree,
         &[&head_commit, &fetch_commit_obj],
     )?;
@@ -187,7 +183,7 @@ pub fn list_remotes(repo: &git2::Repository) -> Result<Vec<RemoteInfo>, git2::Er
     let remotes = repo.remotes()?;
     let mut result = Vec::new();
 
-    for name in remotes.iter().filter_map(|n| n) {
+    for name in remotes.iter().flatten() {
         if let Ok(remote) = repo.find_remote(name) {
             result.push(RemoteInfo {
                 name: name.to_string(),

@@ -1,4 +1,4 @@
-import { useRepoStore } from "@/stores/repoStore";
+import { useRepoStore } from '@/stores/repoStore';
 
 export function useBranches() {
   const {

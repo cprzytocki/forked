@@ -1,12 +1,12 @@
-import { useUiStore } from "@/stores/uiStore";
-import { useRepoStore } from "@/stores/repoStore";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { ScrollArea } from "@/components/common/ScrollArea";
-import { DiffViewer } from "@/components/diff/DiffViewer";
-import { SplitDiffViewer } from "@/components/diff/SplitDiffViewer";
-import { DiffViewToggle } from "@/components/diff/DiffViewToggle";
-import { CommitDetails } from "@/components/history/CommitDetails";
-import { FileText, GitCommit, Loader2 } from "lucide-react";
+import { FileText, GitCommit, Loader2 } from 'lucide-react';
+import { ScrollArea } from '@/components/common/ScrollArea';
+import { DiffViewer } from '@/components/diff/DiffViewer';
+import { DiffViewToggle } from '@/components/diff/DiffViewToggle';
+import { SplitDiffViewer } from '@/components/diff/SplitDiffViewer';
+import { CommitDetails } from '@/components/history/CommitDetails';
+import { useRepoStore } from '@/stores/repoStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export function DetailsPanel() {
   const {
@@ -28,7 +28,7 @@ export function DetailsPanel() {
     );
   }
 
-  if (detailView === "none") {
+  if (detailView === 'none') {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
         <FileText className="h-12 w-12 mb-4" />
@@ -37,27 +37,33 @@ export function DetailsPanel() {
     );
   }
 
-  if (detailView === "diff" && currentFileDiff) {
+  if (detailView === 'diff' && currentFileDiff) {
     return (
       <div className="flex flex-col h-full">
         <div className="p-2 border-b">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            <span className="font-semibold text-sm truncate">{currentFileDiff.path}</span>
+            <span className="font-semibold text-sm truncate">
+              {currentFileDiff.path}
+            </span>
             <div className="ml-auto">
               <DiffViewToggle />
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-            <span className={isSelectedFileStaged ? "text-green-500" : "text-yellow-500"}>
-              {isSelectedFileStaged ? "Staged" : "Unstaged"}
+            <span
+              className={
+                isSelectedFileStaged ? 'text-green-500' : 'text-yellow-500'
+              }
+            >
+              {isSelectedFileStaged ? 'Staged' : 'Unstaged'}
             </span>
             <span>-</span>
             <span className="capitalize">{currentFileDiff.status}</span>
           </div>
         </div>
         <ScrollArea className="flex-1">
-          {diffViewMode === "split" ? (
+          {diffViewMode === 'split' ? (
             <SplitDiffViewer diff={currentFileDiff} />
           ) : (
             <DiffViewer diff={currentFileDiff} />
@@ -67,13 +73,15 @@ export function DetailsPanel() {
     );
   }
 
-  if (detailView === "commit" && selectedCommit && currentCommitDiff) {
+  if (detailView === 'commit' && selectedCommit && currentCommitDiff) {
     return (
       <div className="flex flex-col h-full">
         <div className="p-2 border-b">
           <div className="flex items-center gap-2">
             <GitCommit className="h-4 w-4" />
-            <span className="font-mono text-sm">{selectedCommit.short_id} - {selectedCommit.summary}</span>
+            <span className="font-mono text-sm">
+              {selectedCommit.short_id} - {selectedCommit.summary}
+            </span>
           </div>
         </div>
         <ScrollArea className="flex-1">

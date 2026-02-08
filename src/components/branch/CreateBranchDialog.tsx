@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import { useRepoStore } from "@/stores/repoStore";
-import { useUiStore } from "@/stores/uiStore";
-import { Button } from "@/components/common/Button";
-import { Input } from "@/components/common/Input";
+import type React from 'react';
+import { useState } from 'react';
+import { Button } from '@/components/common/Button';
 import {
   Dialog,
   DialogContent,
@@ -10,29 +8,35 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/common/Dialog";
+} from '@/components/common/Dialog';
+import { Input } from '@/components/common/Input';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export function CreateBranchDialog() {
   const { createBranch } = useRepoStore();
   const { isCreateBranchDialogOpen, closeCreateBranchDialog } = useUiStore();
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
 
   const handleCreate = async () => {
     if (name) {
       await createBranch(name);
       closeCreateBranchDialog();
-      setName("");
+      setName('');
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleCreate();
     }
   };
 
   return (
-    <Dialog open={isCreateBranchDialogOpen} onOpenChange={closeCreateBranchDialog}>
+    <Dialog
+      open={isCreateBranchDialogOpen}
+      onOpenChange={closeCreateBranchDialog}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Branch</DialogTitle>
@@ -42,14 +46,17 @@ export function CreateBranchDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Branch Name</label>
-            <Input
-              placeholder="feature/my-branch"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              autoFocus
-            />
+            <label htmlFor="branch-name" className="text-sm font-medium">
+              Branch Name
+              <Input
+                id="branch-name"
+                placeholder="feature/my-branch"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                autoFocus
+              />
+            </label>
           </div>
         </div>
         <DialogFooter>

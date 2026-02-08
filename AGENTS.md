@@ -33,7 +33,29 @@ No test infrastructure exists. No test runner, no test files, no `#[cfg(test)]` 
 
 ### Linting & Formatting
 
-No ESLint, Prettier, or Rustfmt configuration exists. TypeScript strict mode (`strict: true`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`) is the only enforced check. Run `cargo clippy` for Rust linting.
+```bash
+# Frontend (Biome — linter + formatter)
+pnpm lint                    # Check lint + format (no writes)
+pnpm lint:fix                # Auto-fix lint + format issues
+pnpm format                  # Format only
+
+# Rust
+pnpm check:rust              # cargo clippy with -D warnings
+pnpm format:rust             # cargo fmt
+
+# Full project
+pnpm check:all               # pnpm lint && pnpm check:rust
+```
+
+**Biome** (`biome.json`) handles linting and formatting for TypeScript/React:
+- 2-space indentation, single quotes, double quotes for JSX, trailing commas, 80 char line width
+- Recommended lint rules enabled (includes a11y, correctness, style, suspicious)
+- Import sorting via `organizeImports`
+- Tailwind CSS directive support enabled
+
+**TypeScript** strict mode (`strict: true`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`) is also enforced via `tsc` in the build.
+
+**Rust** uses `cargo clippy` (default rules, warnings treated as errors) and `cargo fmt` (edition 2021, configured in `src-tauri/rustfmt.toml`).
 
 ## Architecture & IPC Flow
 
@@ -59,21 +81,21 @@ Every git operation follows this chain:
 
 ### TypeScript
 
-**Imports** - ordered: third-party, then `@/` alias imports, then relative (same directory only):
+**Imports** - Biome auto-sorts imports alphabetically. Use single quotes:
 ```typescript
-import { useState, useEffect } from "react";
-import { GitBranch, RefreshCw } from "lucide-react";
-import * as tauri from "@/lib/tauri";
-import { useRepoStore } from "@/stores/repoStore";
-import { Button } from "@/components/common/Button";
-import type { FileStatus } from "@/lib/types";    // use `import type` for type-only
+import { GitBranch, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/common/Button';
+import * as tauri from '@/lib/tauri';
+import type { FileStatus } from '@/lib/types';    // use `import type` for type-only
+import { useRepoStore } from '@/stores/repoStore';
 ```
 
 - Use `@/*` path alias for all cross-directory imports (`@/` maps to `./src/`)
 - Use relative imports (`./`) only within the same directory (e.g., inside `src/lib/`)
 - Use `import type { ... }` for type-only imports
-- Use `import * as tauri from "@/lib/tauri"` in stores (namespace import)
-- Use `import * as DialogPrimitive from "@radix-ui/react-dialog"` for Radix primitives
+- Use `import * as tauri from '@/lib/tauri'` in stores (namespace import)
+- Use `import * as DialogPrimitive from '@radix-ui/react-dialog'` for Radix primitives
 
 **Naming:**
 - Components: PascalCase files (`BranchList.tsx`), PascalCase function names, named exports
@@ -166,6 +188,8 @@ pub struct RepoInfo {
 | Settings (persisted) | `src/stores/settingsStore.ts` |
 | Tailwind theme/tokens | `src/styles/globals.css` |
 | Utility (cn helper) | `src/lib/utils.ts` |
+| Biome config (linter/fmt) | `biome.json` |
+| Rust fmt config | `src-tauri/rustfmt.toml` |
 
 ## Common Pitfalls
 
