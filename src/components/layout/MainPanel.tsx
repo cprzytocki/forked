@@ -20,7 +20,7 @@ function CommitItem({ entry, isSelected, onSelect, maxLanes }: CommitItemProps) 
   return (
     <div
       className={cn(
-        "flex items-center cursor-pointer border-b border-border/50 transition-colors",
+        "flex items-center cursor-pointer transition-colors",
         "hover:bg-accent/50",
         isSelected && "bg-accent"
       )}
