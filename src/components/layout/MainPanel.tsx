@@ -1,5 +1,5 @@
-import { GitBranch, GitCommit } from 'lucide-react';
-import { useMemo } from 'react';
+import { GitBranch, GitCommit, Loader2 } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import { CommitGraph } from '@/components/history/CommitGraph';
 import type { CommitGraphEntry, CommitInfo } from '@/lib/types';
@@ -76,9 +76,18 @@ function CommitItem({
 }
 
 export function MainPanel() {
-  const { commits, selectedCommit, selectCommit, currentBranch } =
-    useRepoStore();
+  const {
+    commits,
+    selectedCommit,
+    selectCommit,
+    currentBranch,
+    hasMoreCommits,
+    isLoadingMoreCommits,
+  } = useRepoStore();
   const { loadCommitDiff } = useUiStore();
+
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const maxLanes = useMemo(() => {
     if (commits.length === 0) return 0;
@@ -100,6 +109,39 @@ export function MainPanel() {
     loadCommitDiff(commit.id);
   };
 
+  // IntersectionObserver to detect when the sentinel scrolls into view.
+  // We read fresh state inside the callback to avoid stale closures.
+  // Re-attach the observer whenever commits change or hasMoreCommits changes.
+  useEffect(() => {
+    if (!hasMoreCommits || commits.length === 0) return;
+
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    // Use the ScrollArea's Radix viewport as the observer root
+    const viewport = scrollAreaRef.current?.querySelector(
+      '[data-radix-scroll-area-viewport]',
+    );
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          const state = useRepoStore.getState();
+          if (state.hasMoreCommits && !state.isLoadingMoreCommits) {
+            state.loadMoreCommits();
+          }
+        }
+      },
+      {
+        root: viewport || null,
+        rootMargin: '100px',
+      },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [commits.length, hasMoreCommits]);
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -109,7 +151,8 @@ export function MainPanel() {
           {currentBranch || 'No branch'}
         </span>
         <span className="text-xs text-muted-foreground ml-auto">
-          {commits.length} commits
+          {commits.length}
+          {hasMoreCommits ? '+' : ''} commits
         </span>
       </div>
 
@@ -130,22 +173,37 @@ export function MainPanel() {
       )}
 
       {/* Commit list */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" ref={scrollAreaRef}>
         {commits.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <GitCommit className="h-12 w-12 mb-4" />
             <p>No commits yet</p>
           </div>
         ) : (
-          commits.map((entry) => (
-            <CommitItem
-              key={entry.commit.id}
-              entry={entry}
-              isSelected={selectedCommit?.id === entry.commit.id}
-              onSelect={() => handleSelectCommit(entry.commit)}
-              maxLanes={maxLanes}
-            />
-          ))
+          <>
+            {commits.map((entry) => (
+              <CommitItem
+                key={entry.commit.id}
+                entry={entry}
+                isSelected={selectedCommit?.id === entry.commit.id}
+                onSelect={() => handleSelectCommit(entry.commit)}
+                maxLanes={maxLanes}
+              />
+            ))}
+            {hasMoreCommits && (
+              <div
+                ref={sentinelRef}
+                className="flex items-center justify-center py-3 text-xs text-muted-foreground"
+              >
+                {isLoadingMoreCommits && (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                    Loading more commits...
+                  </>
+                )}
+              </div>
+            )}
+          </>
         )}
       </ScrollArea>
     </div>
