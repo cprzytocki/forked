@@ -9,12 +9,12 @@ A multiplatform desktop Git client built with **Tauri 2.x** (Rust backend) + **R
 ## Development Commands
 
 ```bash
-npm install                  # Install frontend dependencies
-npm run tauri dev            # Run full app in development (starts Vite + Rust backend)
-npm run tauri build          # Build production app for current platform
-npm run dev                  # Start Vite dev server only (frontend at localhost:1420)
-npm run build                # TypeScript check + Vite build (frontend only)
-npx tsc --noEmit             # Type-check frontend without emitting
+pnpm install                 # Install frontend dependencies
+pnpm tauri dev               # Run full app in development (starts Vite + Rust backend)
+pnpm tauri build             # Build production app for current platform
+pnpm dev                     # Start Vite dev server only (frontend at localhost:1420)
+pnpm build                   # TypeScript check + Vite build (frontend only)
+pnpm tsc --noEmit            # Type-check frontend without emitting
 ```
 
 Rust backend builds are handled by Tauri automatically. To work on Rust code directly:
