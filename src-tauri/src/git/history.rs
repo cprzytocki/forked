@@ -255,9 +255,25 @@ pub fn get_commit_history(
     repo: &Repository,
     limit: usize,
     skip: usize,
+    branch_name: Option<&str>,
 ) -> Result<Vec<CommitInfo>, GitClientError> {
     let mut revwalk = repo.revwalk()?;
-    revwalk.push_head()?;
+    match branch_name {
+        Some(name) => {
+            let reference = repo
+                .find_branch(name, git2::BranchType::Local)
+                .or_else(|_| repo.find_branch(name, git2::BranchType::Remote))
+                .map_err(|e| GitClientError::Operation(format!("Branch '{}' not found: {}", name, e)))?;
+            let oid = reference
+                .get()
+                .target()
+                .ok_or_else(|| GitClientError::Operation(format!("Branch '{}' has no target", name)))?;
+            revwalk.push(oid)?;
+        }
+        None => {
+            revwalk.push_head()?;
+        }
+    }
     revwalk.set_sorting(Sort::TIME)?;
 
     let commits: Vec<CommitInfo> = revwalk
@@ -364,8 +380,9 @@ pub fn get_commit_history_with_graph(
     repo: &Repository,
     limit: usize,
     skip: usize,
+    branch_name: Option<&str>,
 ) -> Result<Vec<CommitGraphEntry>, GitClientError> {
-    let commits = get_commit_history(repo, limit, skip)?;
+    let commits = get_commit_history(repo, limit, skip, branch_name)?;
     let graph_nodes = compute_graph(&commits, repo);
 
     let entries: Vec<CommitGraphEntry> = commits

@@ -26,6 +26,7 @@ interface RepoState {
   // Branches
   branches: BranchInfo[];
   currentBranch: string | null;
+  viewingBranch: string | null;
 
   // Remotes
   remotes: RemoteInfo[];
@@ -62,6 +63,7 @@ interface RepoState {
   checkoutBranch: (name: string) => Promise<void>;
   deleteBranch: (name: string) => Promise<void>;
   mergeBranch: (name: string) => Promise<void>;
+  viewBranchCommits: (name: string | null) => Promise<void>;
 
   // Remote actions
   fetch: (remote: string) => Promise<void>;
@@ -89,6 +91,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   isLoadingMoreCommits: false,
   branches: [],
   currentBranch: null,
+  viewingBranch: null,
   remotes: [],
   stashes: [],
 
@@ -142,6 +145,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
       isLoadingMoreCommits: false,
       branches: [],
       currentBranch: null,
+      viewingBranch: null,
       remotes: [],
       stashes: [],
     });
@@ -158,7 +162,8 @@ export const useRepoStore = create<RepoState>((set, get) => ({
 
   refreshCommits: async (limit = 50) => {
     try {
-      const commits = await tauri.getCommitHistoryWithGraph(limit);
+      const { viewingBranch } = get();
+      const commits = await tauri.getCommitHistoryWithGraph(limit, 0, viewingBranch);
       set({ commits, hasMoreCommits: commits.length >= limit });
     } catch (_e) {
       // Empty repo might not have commits
@@ -167,14 +172,14 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   loadMoreCommits: async () => {
-    const { commits, hasMoreCommits, isLoadingMoreCommits } = get();
+    const { commits, hasMoreCommits, isLoadingMoreCommits, viewingBranch } = get();
     if (!hasMoreCommits || isLoadingMoreCommits) return;
 
     const pageSize = 50;
     const newLimit = commits.length + pageSize;
     set({ isLoadingMoreCommits: true });
     try {
-      const result = await tauri.getCommitHistoryWithGraph(newLimit);
+      const result = await tauri.getCommitHistoryWithGraph(newLimit, 0, viewingBranch);
       set({
         commits: result,
         hasMoreCommits: result.length >= newLimit,
@@ -293,6 +298,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   checkoutBranch: async (name: string) => {
     try {
       await tauri.checkoutBranch(name);
+      set({ viewingBranch: null });
       await get().refreshAll();
     } catch (e) {
       set({ error: String(e) });
@@ -317,6 +323,16 @@ export const useRepoStore = create<RepoState>((set, get) => ({
       await get().refreshAll();
     } catch (e) {
       set({ error: String(e) });
+    }
+  },
+
+  viewBranchCommits: async (name: string | null) => {
+    set({ viewingBranch: name });
+    try {
+      const commits = await tauri.getCommitHistoryWithGraph(50, 0, name);
+      set({ commits, hasMoreCommits: commits.length >= 50 });
+    } catch (_e) {
+      set({ commits: [], hasMoreCommits: false });
     }
   },
 
