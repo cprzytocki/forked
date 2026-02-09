@@ -19,12 +19,14 @@ function App() {
   const {
     addRecentRepo,
     sidebarWidth,
+    setSidebarWidth,
     detailsPanelHeight,
     setDetailsPanelHeight,
   } = useSettingsStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const isSidebarDragging = useRef(false);
 
   const showDetailsPanel = detailView !== 'none' || isDiffLoading;
 
@@ -83,8 +85,21 @@ function App() {
     document.body.style.userSelect = 'none';
   }, []);
 
+  const handleSidebarMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isSidebarDragging.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      if (isSidebarDragging.current) {
+        const newWidth = e.clientX;
+        const clamped = Math.max(215, Math.min(newWidth, 480));
+        setSidebarWidth(clamped);
+        return;
+      }
       if (!isDragging.current || !containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const newHeight = rect.bottom - e.clientY;
@@ -98,6 +113,11 @@ function App() {
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
       }
+      if (isSidebarDragging.current) {
+        isSidebarDragging.current = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -106,7 +126,7 @@ function App() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [setDetailsPanelHeight]);
+  }, [setDetailsPanelHeight, setSidebarWidth]);
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
@@ -130,6 +150,13 @@ function App() {
             <div style={{ width: sidebarWidth }} className="flex-shrink-0">
               <Sidebar />
             </div>
+
+            {/* Sidebar resize handle */}
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: resize drag handle */}
+            <div
+              className="flex-shrink-0 w-1 cursor-col-resize bg-border hover:bg-primary/50 transition-colors"
+              onMouseDown={handleSidebarMouseDown}
+            />
 
             {/* Main content area - vertical split */}
             <div
