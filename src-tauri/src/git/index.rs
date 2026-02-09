@@ -1,5 +1,5 @@
 use crate::error::GitClientError;
-use git2::Repository;
+use git2::{Oid, Repository, ResetType};
 use std::path::Path;
 
 pub fn stage_file(repo: &Repository, path: &str) -> Result<(), GitClientError> {
@@ -59,5 +59,30 @@ pub fn discard_all_changes(repo: &Repository) -> Result<(), GitClientError> {
     checkout_opts.force();
 
     repo.checkout_head(Some(&mut checkout_opts))?;
+    Ok(())
+}
+
+pub fn reset_to_commit(
+    repo: &Repository,
+    commit_id: &str,
+    mode: &str,
+) -> Result<(), GitClientError> {
+    let oid = Oid::from_str(commit_id)
+        .map_err(|e| GitClientError::Operation(format!("Invalid commit ID: {}", e)))?;
+    let commit = repo.find_commit(oid)?;
+    let object = commit.into_object();
+
+    let reset_type = match mode {
+        "soft" => ResetType::Soft,
+        "hard" => ResetType::Hard,
+        _ => {
+            return Err(GitClientError::Operation(format!(
+                "Invalid reset mode: {}. Expected 'soft' or 'hard'.",
+                mode
+            )))
+        }
+    };
+
+    repo.reset(&object, reset_type, None)?;
     Ok(())
 }

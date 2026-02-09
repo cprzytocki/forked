@@ -118,3 +118,17 @@ pub fn get_commit_details(
         .ok_or(GitClientError::NoRepository)?;
     git::get_commit_details(repo, &oid)
 }
+
+#[tauri::command]
+pub fn reset_to_commit(
+    commit_id: String,
+    mode: String,
+    state: State<AppState>,
+) -> Result<(), GitClientError> {
+    let guard = state.repo.lock();
+    let repo = guard
+        .repository
+        .as_ref()
+        .ok_or(GitClientError::NoRepository)?;
+    git::reset_to_commit(repo, &commit_id, &mode)
+}

@@ -1,5 +1,10 @@
 import { GitBranch, GitCommit, Loader2 } from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import {
+  ContextMenu,
+  ContextMenuItem,
+} from '@/components/common/ContextMenu';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import { CommitGraph } from '@/components/history/CommitGraph';
 import type { CommitGraphEntry, CommitInfo } from '@/lib/types';
@@ -11,6 +16,7 @@ interface CommitItemProps {
   entry: CommitGraphEntry;
   isSelected: boolean;
   onSelect: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   maxLanes: number;
 }
 
@@ -18,6 +24,7 @@ function CommitItem({
   entry,
   isSelected,
   onSelect,
+  onContextMenu,
   maxLanes,
 }: CommitItemProps) {
   const { commit, graph } = entry;
@@ -31,6 +38,7 @@ function CommitItem({
         isSelected && 'bg-accent',
       )}
       onClick={onSelect}
+      onContextMenu={onContextMenu}
     >
       {/* Graph column */}
       <div className="flex-shrink-0">
@@ -81,13 +89,28 @@ export function MainPanel() {
     selectedCommit,
     selectCommit,
     currentBranch,
+    viewingBranch,
     hasMoreCommits,
     isLoadingMoreCommits,
+    resetToCommit,
   } = useRepoStore();
   const { loadCommitDiff } = useUiStore();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const [contextMenu, setContextMenu] = useState<{
+    position: { x: number; y: number };
+    commit: CommitInfo;
+  } | null>(null);
+
+  const [resetConfirm, setResetConfirm] = useState<{
+    commitId: string;
+    commitSummary: string;
+    mode: 'soft' | 'hard';
+  } | null>(null);
+
+  const canReset = viewingBranch === null || viewingBranch === currentBranch;
 
   const maxLanes = useMemo(() => {
     if (commits.length === 0) return 0;
@@ -187,6 +210,14 @@ export function MainPanel() {
                 entry={entry}
                 isSelected={selectedCommit?.id === entry.commit.id}
                 onSelect={() => handleSelectCommit(entry.commit)}
+                onContextMenu={(e) => {
+                  if (!canReset) return;
+                  e.preventDefault();
+                  setContextMenu({
+                    position: { x: e.clientX, y: e.clientY },
+                    commit: entry.commit,
+                  });
+                }}
                 maxLanes={maxLanes}
               />
             ))}
@@ -206,6 +237,81 @@ export function MainPanel() {
           </>
         )}
       </ScrollArea>
+
+      {contextMenu && (
+        <ContextMenu
+          position={contextMenu.position}
+          onClose={() => setContextMenu(null)}
+        >
+          <ContextMenuItem
+            onClick={() => {
+              setResetConfirm({
+                commitId: contextMenu.commit.id,
+                commitSummary: contextMenu.commit.summary,
+                mode: 'soft',
+              });
+              setContextMenu(null);
+            }}
+          >
+            Soft Reset to Here
+          </ContextMenuItem>
+          <ContextMenuItem
+            destructive
+            onClick={() => {
+              setResetConfirm({
+                commitId: contextMenu.commit.id,
+                commitSummary: contextMenu.commit.summary,
+                mode: 'hard',
+              });
+              setContextMenu(null);
+            }}
+          >
+            Hard Reset to Here
+          </ContextMenuItem>
+        </ContextMenu>
+      )}
+
+      <ConfirmDialog
+        open={resetConfirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setResetConfirm(null);
+        }}
+        title={resetConfirm?.mode === 'hard' ? 'Hard Reset' : 'Soft Reset'}
+        description={
+          resetConfirm?.mode === 'hard' ? (
+            <>
+              Are you sure you want to{' '}
+              <span className="font-semibold text-destructive">hard reset</span>{' '}
+              to{' '}
+              <span className="font-semibold text-foreground">
+                {resetConfirm?.commitSummary}
+              </span>
+              ? This will discard all uncommitted changes and cannot be undone.
+            </>
+          ) : (
+            <>
+              Reset HEAD to{' '}
+              <span className="font-semibold text-foreground">
+                {resetConfirm?.commitSummary}
+              </span>
+              ? Changes after this commit will be preserved as staged changes.
+            </>
+          )
+        }
+        confirmLabel={
+          resetConfirm?.mode === 'hard' ? 'Hard Reset' : 'Soft Reset'
+        }
+        confirmVariant={
+          resetConfirm?.mode === 'hard' ? 'destructive' : 'default'
+        }
+        onConfirm={() => {
+          if (resetConfirm) {
+            resetToCommit(resetConfirm.commitId, resetConfirm.mode);
+          }
+          setResetConfirm(null);
+        }}
+        onCancel={() => setResetConfirm(null)}
+      />
     </div>
   );
 }

@@ -96,6 +96,10 @@ export async function getCommitDetails(oid: string): Promise<CommitDetails> {
   return invoke('get_commit_details', { oid });
 }
 
+export async function resetToCommit(commitId: string, mode: 'soft' | 'hard'): Promise<void> {
+  return invoke('reset_to_commit', { commitId, mode });
+}
+
 // Branch commands
 export async function listBranches(): Promise<BranchInfo[]> {
   return invoke('list_branches');
