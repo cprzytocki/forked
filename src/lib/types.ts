@@ -94,6 +94,8 @@ export interface BranchInfo {
   upstream: string | null;
   commit_id: string | null;
   commit_summary: string | null;
+  ahead: number | null;
+  behind: number | null;
 }
 
 export interface MergeResult {

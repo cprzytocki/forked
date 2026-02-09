@@ -33,6 +33,14 @@ function App() {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
+  // Auto-open most recent repository on startup
+  useEffect(() => {
+    const recentRepos = useSettingsStore.getState().recentRepos;
+    if (recentRepos.length > 0 && !useRepoStore.getState().repoInfo) {
+      useRepoStore.getState().openRepository(recentRepos[0]);
+    }
+  }, []);
+
   // Add to recent repos when opening
   useEffect(() => {
     if (repoInfo?.path) {

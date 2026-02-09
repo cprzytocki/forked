@@ -19,6 +19,8 @@ pub struct BranchInfo {
     pub upstream: Option<String>,
     pub commit_id: Option<String>,
     pub commit_summary: Option<String>,
+    pub ahead: Option<usize>,
+    pub behind: Option<usize>,
 }
 
 pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientError> {
@@ -53,12 +55,27 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
             .ok()
             .and_then(|u| u.name().ok().flatten().map(|s| s.to_string()));
 
-        let (commit_id, commit_summary) = branch
-            .get()
-            .peel_to_commit()
-            .ok()
-            .map(|c| (Some(c.id().to_string()), c.summary().map(|s| s.to_string())))
-            .unwrap_or((None, None));
+        let commit_obj = branch.get().peel_to_commit().ok();
+        let commit_id = commit_obj.as_ref().map(|c| c.id().to_string());
+        let commit_summary = commit_obj.as_ref().and_then(|c| c.summary().map(|s| s.to_string()));
+
+        let (ahead, behind) = if !is_remote {
+            if let (Some(local_commit), Ok(upstream_ref)) = (&commit_obj, branch.upstream()) {
+                upstream_ref
+                    .get()
+                    .peel_to_commit()
+                    .ok()
+                    .and_then(|upstream_commit| {
+                        repo.graph_ahead_behind(local_commit.id(), upstream_commit.id()).ok()
+                    })
+                    .map(|(a, b)| (Some(a), Some(b)))
+                    .unwrap_or((None, None))
+            } else {
+                (None, None)
+            }
+        } else {
+            (None, None)
+        };
 
         branches.push(BranchInfo {
             name,
@@ -68,6 +85,8 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
             upstream,
             commit_id,
             commit_summary,
+            ahead,
+            behind,
         });
     }
 
@@ -112,6 +131,8 @@ pub fn create_branch(repo: &Repository, name: &str, source_branch: Option<&str>)
         upstream: None,
         commit_id: Some(commit.id().to_string()),
         commit_summary: commit.summary().map(|s| s.to_string()),
+        ahead: None,
+        behind: None,
     })
 }
 
