@@ -26,7 +26,7 @@ function CommitItem({
     <button
       type="button"
       className={cn(
-        'flex items-center cursor-pointer transition-colors w-full text-left',
+        'pl-1 flex items-center cursor-pointer transition-colors w-full text-left',
         'hover:bg-accent/50',
         isSelected && 'bg-accent',
       )}
