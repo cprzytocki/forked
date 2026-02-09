@@ -53,7 +53,7 @@ function App() {
   // Show error toast
   useEffect(() => {
     if (error) {
-      console.error('Git Client Error:', error);
+      console.error('Forked Error:', error);
       const timeout = setTimeout(() => clearError(), 5000);
       return () => clearTimeout(timeout);
     }

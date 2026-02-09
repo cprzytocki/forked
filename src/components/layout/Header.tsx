@@ -48,7 +48,7 @@ export function Header() {
     <header className="h-12 border-b flex items-center px-4 gap-4 bg-background">
       <div className="flex items-center gap-2">
         <GitFork className="h-5 w-5 text-primary" />
-        <span className="font-semibold">{repoInfo?.name || 'Git Client'}{currentBranch && ` - ${currentBranch}`}</span>
+        <span className="font-semibold">{repoInfo?.name || 'Forked'}</span>
       </div>
 
       {repoInfo && (

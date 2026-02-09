@@ -49,7 +49,7 @@ export function RepoSelector() {
         <div className="flex items-center justify-center mb-8">
           <GitBranch className="h-16 w-16 text-primary" />
         </div>
-        <h1 className="text-2xl font-bold text-center mb-2">Git Client</h1>
+        <h1 className="text-2xl font-bold text-center mb-2">Forked</h1>
         <p className="text-muted-foreground text-center mb-8">
           A fast and beautiful Git client
         </p>

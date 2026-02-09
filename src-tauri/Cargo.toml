@@ -1,12 +1,12 @@
 [package]
-name = "git-client"
+name = "forked"
 version = "0.1.0"
-description = "A multiplatform desktop Git client"
+description = "Forked — a multiplatform desktop Git client"
 authors = ["you"]
 edition = "2021"
 
 [lib]
-name = "git_client_lib"
+name = "forked_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]

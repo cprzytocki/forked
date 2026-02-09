@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A multiplatform desktop Git client built with **Tauri 2.x** (Rust backend) + **React 18** (TypeScript frontend). Uses `git2-rs` for git operations, Zustand for state management, and Tailwind CSS with shadcn/ui-style components.
+Forked is a multiplatform desktop Git client built with **Tauri 2.x** (Rust backend) + **React 18** (TypeScript frontend). Uses `git2-rs` for git operations, Zustand for state management, and Tailwind CSS with shadcn/ui-style components.
 
 ## Development Commands
 
