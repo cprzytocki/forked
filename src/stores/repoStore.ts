@@ -10,7 +10,6 @@ import type {
   StashEntry,
 } from '@/lib/types';
 
-//test
 interface RepoState {
   // Repository state
   repoInfo: RepoInfo | null;
