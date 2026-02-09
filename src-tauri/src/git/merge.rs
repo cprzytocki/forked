@@ -71,21 +71,18 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
         });
     }
 
-    // Sort: HEAD branch first, then local branches, then remote branches
+    // Sort: HEAD first, then default branch, then local branches, then remote branches
     branches.sort_by(|a, b| {
-        if a.is_head && !b.is_head {
-            std::cmp::Ordering::Less
-        } else if !a.is_head && b.is_head {
-            std::cmp::Ordering::Greater
-        } else if a.is_remote != b.is_remote {
-            if a.is_remote {
-                std::cmp::Ordering::Greater
-            } else {
-                std::cmp::Ordering::Less
-            }
-        } else {
-            a.name.cmp(&b.name)
+        if a.is_head != b.is_head {
+            return if a.is_head { std::cmp::Ordering::Less } else { std::cmp::Ordering::Greater };
         }
+        if a.is_remote != b.is_remote {
+            return if a.is_remote { std::cmp::Ordering::Greater } else { std::cmp::Ordering::Less };
+        }
+        if a.is_default != b.is_default {
+            return if a.is_default { std::cmp::Ordering::Less } else { std::cmp::Ordering::Greater };
+        }
+        a.name.cmp(&b.name)
     });
 
     Ok(branches)
