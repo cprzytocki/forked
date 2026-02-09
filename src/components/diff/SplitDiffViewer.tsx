@@ -19,7 +19,7 @@ function SplitLineCell({
 }) {
   if (!line) {
     return (
-      <div className="flex font-mono text-xs bg-muted/30 min-h-[1.5rem]" />
+      <div className="flex font-mono text-xs bg-muted/30"/>
     );
   }
 
