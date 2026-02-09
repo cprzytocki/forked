@@ -80,6 +80,7 @@ pub fn create_commit(
 pub fn get_commit_history(
     limit: usize,
     skip: usize,
+    branch_name: Option<String>,
     state: State<AppState>,
 ) -> Result<Vec<CommitInfo>, GitClientError> {
     let guard = state.repo.lock();
@@ -87,13 +88,14 @@ pub fn get_commit_history(
         .repository
         .as_ref()
         .ok_or(GitClientError::NoRepository)?;
-    git::get_commit_history(repo, limit, skip)
+    git::get_commit_history(repo, limit, skip, branch_name.as_deref())
 }
 
 #[tauri::command]
 pub fn get_commit_history_with_graph(
     limit: usize,
     skip: usize,
+    branch_name: Option<String>,
     state: State<AppState>,
 ) -> Result<Vec<CommitGraphEntry>, GitClientError> {
     let guard = state.repo.lock();
@@ -101,7 +103,7 @@ pub fn get_commit_history_with_graph(
         .repository
         .as_ref()
         .ok_or(GitClientError::NoRepository)?;
-    git::get_commit_history_with_graph(repo, limit, skip)
+    git::get_commit_history_with_graph(repo, limit, skip, branch_name.as_deref())
 }
 
 #[tauri::command]

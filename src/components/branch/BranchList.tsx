@@ -1,4 +1,4 @@
-import { Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Star, Trash2 } from 'lucide-react';
+import { ArrowRightLeft, Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Star, Trash2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
@@ -11,6 +11,8 @@ import { useUiStore } from '@/stores/uiStore';
 
 interface BranchItemProps {
   branch: BranchInfo;
+  isViewing: boolean;
+  onSelect: () => void;
   onCheckout: () => void;
   onDelete: () => void;
   onMerge: () => void;
@@ -18,6 +20,8 @@ interface BranchItemProps {
 
 function BranchItem({
   branch,
+  isViewing,
+  onSelect,
   onCheckout,
   onDelete,
   onMerge,
@@ -28,8 +32,9 @@ function BranchItem({
       className={cn(
         'group flex items-center gap-2 px-2 py-1.5 hover:bg-accent cursor-pointer w-full text-left',
         branch.is_head && 'bg-accent',
+        isViewing && !branch.is_head && 'bg-accent/50',
       )}
-      onClick={onCheckout}
+      onClick={onSelect}
     >
       {branch.is_remote ? (
         <Cloud className="h-4 w-4 text-muted-foreground" />
@@ -53,6 +58,19 @@ function BranchItem({
       {branch.is_head && <Check className="h-4 w-4 text-green-500" />}
       {!branch.is_head && !branch.is_remote && (
         <div className="hidden group-hover:flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCheckout();
+            }}
+            title="Checkout branch"
+            aria-label="Checkout branch"
+          >
+            <ArrowRightLeft className="h-3 w-3" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -88,9 +106,11 @@ function BranchItem({
 interface BranchSectionProps {
   title: string;
   branches: BranchInfo[];
+  viewingBranch: string | null;
   defaultExpanded?: boolean;
   className?: string;
   action?: React.ReactNode;
+  onSelect: (name: string) => void;
   onCheckout: (name: string) => void;
   onDelete: (name: string) => void;
   onMerge: (name: string) => void;
@@ -99,9 +119,11 @@ interface BranchSectionProps {
 function BranchSection({
   title,
   branches,
+  viewingBranch,
   defaultExpanded = true,
   className,
   action,
+  onSelect,
   onCheckout,
   onDelete,
   onMerge,
@@ -136,6 +158,8 @@ function BranchSection({
             <BranchItem
               key={branch.name}
               branch={branch}
+              isViewing={viewingBranch === branch.name}
+              onSelect={() => onSelect(branch.name)}
               onCheckout={() => onCheckout(branch.name)}
               onDelete={() => onDelete(branch.name)}
               onMerge={() => onMerge(branch.name)}
@@ -148,7 +172,7 @@ function BranchSection({
 }
 
 export function BranchList() {
-  const { branches, checkoutBranch, deleteBranch, mergeBranch } =
+  const { branches, checkoutBranch, deleteBranch, mergeBranch, viewBranchCommits, viewingBranch } =
     useRepoStore();
   const { openCreateBranchDialog } = useUiStore();
   const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
@@ -156,6 +180,15 @@ export function BranchList() {
 
   const localBranches = branches.filter((b) => !b.is_remote);
   const remoteBranches = branches.filter((b) => b.is_remote);
+
+  const handleSelect = (name: string) => {
+    const branch = branches.find((b) => b.name === name);
+    if (branch?.is_head) {
+      viewBranchCommits(null);
+    } else {
+      viewBranchCommits(name);
+    }
+  };
 
   const handleCheckout = (name: string) => {
     const branch = branches.find((b) => b.name === name);
@@ -169,6 +202,7 @@ export function BranchList() {
         <BranchSection
           title="Local"
           branches={localBranches}
+          viewingBranch={viewingBranch}
           className="py-2"
           action={
             <Button
@@ -182,6 +216,7 @@ export function BranchList() {
               <Plus className="h-3 w-3" />
             </Button>
           }
+          onSelect={handleSelect}
           onCheckout={handleCheckout}
           onDelete={setBranchToDelete}
           onMerge={mergeBranch}
@@ -189,7 +224,9 @@ export function BranchList() {
         <BranchSection
           title="Remote"
           branches={remoteBranches}
+          viewingBranch={viewingBranch}
           className="py-2 border-t"
+          onSelect={handleSelect}
           onCheckout={handleCheckout}
           onDelete={() => {}}
           onMerge={() => {}}

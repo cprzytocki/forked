@@ -87,8 +87,9 @@ export async function getCommitHistory(
 export async function getCommitHistoryWithGraph(
   limit: number = 50,
   skip: number = 0,
+  branchName?: string | null,
 ): Promise<CommitGraphEntry[]> {
-  return invoke('get_commit_history_with_graph', { limit, skip });
+  return invoke('get_commit_history_with_graph', { limit, skip, branchName: branchName ?? null });
 }
 
 export async function getCommitDetails(oid: string): Promise<CommitDetails> {
