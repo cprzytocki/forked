@@ -59,7 +59,7 @@ interface RepoState {
   selectCommit: (commit: CommitInfo | null) => void;
 
   // Branch actions
-  createBranch: (name: string) => Promise<void>;
+  createBranch: (name: string, sourceBranch?: string) => Promise<void>;
   checkoutBranch: (name: string) => Promise<void>;
   deleteBranch: (name: string) => Promise<void>;
   mergeBranch: (name: string) => Promise<void>;
@@ -282,9 +282,9 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     set({ selectedCommit: commit });
   },
 
-  createBranch: async (name: string) => {
+  createBranch: async (name: string, sourceBranch?: string) => {
     try {
-      await tauri.createBranch(name);
+      await tauri.createBranch(name, sourceBranch);
       await get().refreshBranches();
     } catch (e) {
       set({ error: String(e) });

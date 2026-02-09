@@ -15,6 +15,7 @@ pub struct BranchInfo {
     pub name: String,
     pub is_head: bool,
     pub is_remote: bool,
+    pub is_default: bool,
     pub upstream: Option<String>,
     pub commit_id: Option<String>,
     pub commit_summary: Option<String>,
@@ -28,12 +29,24 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
         .as_ref()
         .and_then(|h| h.shorthand().map(|s| s.to_string()));
 
+    // Detect the default branch from origin/HEAD (e.g. "refs/remotes/origin/main")
+    let default_branch_name = repo
+        .find_reference("refs/remotes/origin/HEAD")
+        .ok()
+        .and_then(|r| r.symbolic_target().map(|s| s.to_string()))
+        .and_then(|target| target.strip_prefix("refs/remotes/origin/").map(|s| s.to_string()));
+
     for branch_result in repo.branches(None)? {
         let (branch, branch_type) = branch_result?;
 
         let name = branch.name()?.unwrap_or("").to_string();
         let is_remote = branch_type == git2::BranchType::Remote;
         let is_head = head_name.as_ref().map(|h| h == &name).unwrap_or(false);
+
+        let is_default = default_branch_name
+            .as_ref()
+            .map(|d| name == *d)
+            .unwrap_or(false);
 
         let upstream = branch
             .upstream()
@@ -51,6 +64,7 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
             name,
             is_head,
             is_remote,
+            is_default,
             upstream,
             commit_id,
             commit_summary,
@@ -77,9 +91,19 @@ pub fn list_branches(repo: &Repository) -> Result<Vec<BranchInfo>, GitClientErro
     Ok(branches)
 }
 
-pub fn create_branch(repo: &Repository, name: &str) -> Result<BranchInfo, GitClientError> {
-    let head = repo.head()?;
-    let commit = head.peel_to_commit()?;
+pub fn create_branch(repo: &Repository, name: &str, source_branch: Option<&str>) -> Result<BranchInfo, GitClientError> {
+    let commit = match source_branch {
+        Some(source) => {
+            let branch = repo
+                .find_branch(source, git2::BranchType::Local)
+                .or_else(|_| repo.find_branch(source, git2::BranchType::Remote))?;
+            branch.get().peel_to_commit()?
+        }
+        None => {
+            let head = repo.head()?;
+            head.peel_to_commit()?
+        }
+    };
 
     let _branch = repo.branch(name, &commit, false)?;
 
@@ -87,6 +111,7 @@ pub fn create_branch(repo: &Repository, name: &str) -> Result<BranchInfo, GitCli
         name: name.to_string(),
         is_head: false,
         is_remote: false,
+        is_default: false,
         upstream: None,
         commit_id: Some(commit.id().to_string()),
         commit_summary: commit.summary().map(|s| s.to_string()),

@@ -1,7 +1,15 @@
-import { Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Star, Trash2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/common/Dialog';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import type { BranchInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -36,6 +44,7 @@ function BranchItem({
         <GitBranch className="h-4 w-4 text-muted-foreground" />
       )}
       <span className="flex-1 text-sm truncate">{branch.name}</span>
+      {branch.is_default && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
       {branch.is_head && <Check className="h-4 w-4 text-green-500" />}
       {!branch.is_head && !branch.is_remote && (
         <div className="hidden group-hover:flex items-center gap-1">
@@ -101,7 +110,7 @@ function BranchSection({
       <div className="flex items-center gap-1 px-2 py-1">
         <button
           type="button"
-          className="flex flex-1 items-center gap-1 cursor-pointer hover:bg-accent rounded-sm text-left"
+          className="flex flex-1 items-center gap-1 cursor-pointer rounded-sm text-left"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? (
@@ -137,6 +146,7 @@ export function BranchList() {
   const { branches, checkoutBranch, deleteBranch, mergeBranch } =
     useRepoStore();
   const { openCreateBranchDialog } = useUiStore();
+  const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
 
   const localBranches = branches.filter((b) => !b.is_remote);
   const remoteBranches = branches.filter((b) => b.is_remote);
@@ -161,7 +171,7 @@ export function BranchList() {
             </Button>
           }
           onCheckout={checkoutBranch}
-          onDelete={deleteBranch}
+          onDelete={setBranchToDelete}
           onMerge={mergeBranch}
         />
         <BranchSection
@@ -173,6 +183,33 @@ export function BranchList() {
           onMerge={() => {}}
         />
       </ScrollArea>
+
+      <Dialog open={branchToDelete !== null} onOpenChange={(open) => { if (!open) setBranchToDelete(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete branch</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-semibold text-foreground">{branchToDelete}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBranchToDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (branchToDelete) {
+                  deleteBranch(branchToDelete);
+                }
+                setBranchToDelete(null);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

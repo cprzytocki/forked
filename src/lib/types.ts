@@ -90,6 +90,7 @@ export interface BranchInfo {
   name: string;
   is_head: boolean;
   is_remote: boolean;
+  is_default: boolean;
   upstream: string | null;
   commit_id: string | null;
   commit_summary: string | null;

@@ -100,8 +100,8 @@ export async function listBranches(): Promise<BranchInfo[]> {
   return invoke('list_branches');
 }
 
-export async function createBranch(name: string): Promise<BranchInfo> {
-  return invoke('create_branch', { name });
+export async function createBranch(name: string, sourceBranch?: string): Promise<BranchInfo> {
+  return invoke('create_branch', { name, sourceBranch });
 }
 
 export async function checkoutBranch(name: string): Promise<void> {

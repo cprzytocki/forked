@@ -14,13 +14,13 @@ pub fn list_branches(state: State<AppState>) -> Result<Vec<BranchInfo>, GitClien
 }
 
 #[tauri::command]
-pub fn create_branch(name: String, state: State<AppState>) -> Result<BranchInfo, GitClientError> {
+pub fn create_branch(name: String, source_branch: Option<String>, state: State<AppState>) -> Result<BranchInfo, GitClientError> {
     let guard = state.repo.lock();
     let repo = guard
         .repository
         .as_ref()
         .ok_or(GitClientError::NoRepository)?;
-    git::create_branch(repo, &name)
+    git::create_branch(repo, &name, source_branch.as_deref())
 }
 
 #[tauri::command]
