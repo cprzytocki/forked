@@ -44,7 +44,7 @@ export function RepoSelector() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8">
+    <div className="flex flex-col items-center justify-center h-full w-full p-8">
       <div className="max-w-md w-full">
         <div className="flex items-center justify-center mb-8">
           <GitBranch className="h-16 w-16 text-primary" />
