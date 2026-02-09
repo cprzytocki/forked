@@ -1,8 +1,8 @@
 import {
   Archive,
   Download,
+  GitFork,
   FolderOpen,
-  GitBranch,
   Loader2,
   Moon,
   RefreshCw,
@@ -47,7 +47,7 @@ export function Header() {
   return (
     <header className="h-12 border-b flex items-center px-4 gap-4 bg-background">
       <div className="flex items-center gap-2">
-        <GitBranch className="h-5 w-5 text-primary" />
+        <GitFork className="h-5 w-5 text-primary" />
         <span className="font-semibold">{repoInfo?.name || 'Git Client'}</span>
       </div>
 
