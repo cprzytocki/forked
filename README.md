@@ -49,7 +49,7 @@ npm run tauri build
 ## Project Structure
 
 ```
-git-client/
+forked/
 ├── src-tauri/              # Rust backend
 │   ├── src/
 │   │   ├── commands/       # Tauri IPC commands

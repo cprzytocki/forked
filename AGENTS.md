@@ -4,7 +4,7 @@ Instructions for AI coding agents working in this repository.
 
 ## Project Overview
 
-Multiplatform desktop Git client: **Tauri 2.x** (Rust backend) + **React 18** (TypeScript frontend). Uses `git2-rs` for git operations, Zustand for state management, Tailwind CSS with shadcn/ui components.
+Forked is a multiplatform desktop Git client: **Tauri 2.x** (Rust backend) + **React 18** (TypeScript frontend). Uses `git2-rs` for git operations, Zustand for state management, Tailwind CSS with shadcn/ui components.
 
 ## Build & Development Commands
 

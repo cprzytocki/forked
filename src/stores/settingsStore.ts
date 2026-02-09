@@ -67,7 +67,7 @@ export const useSettingsStore = create<SettingsState>()(
         set({ detailsPanelHeight: height }),
     }),
     {
-      name: 'git-client-settings',
+      name: 'forked-settings',
     },
   ),
 );

@@ -1,7 +1,7 @@
 {
   "$schema": "https://schemas.tauri.app/next/schema/capability",
   "identifier": "default",
-  "description": "Default capabilities for the Git Client",
+  "description": "Default capabilities for Forked",
   "windows": ["main"],
   "permissions": [
     "core:default",
