@@ -2,14 +2,7 @@ import { Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Sta
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/common/Dialog';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import type { BranchInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -159,9 +152,16 @@ export function BranchList() {
     useRepoStore();
   const { openCreateBranchDialog } = useUiStore();
   const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
+  const [branchToCheckout, setBranchToCheckout] = useState<string | null>(null);
 
   const localBranches = branches.filter((b) => !b.is_remote);
   const remoteBranches = branches.filter((b) => b.is_remote);
+
+  const handleCheckout = (name: string) => {
+    const branch = branches.find((b) => b.name === name);
+    if (branch?.is_head) return;
+    setBranchToCheckout(name);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -182,7 +182,7 @@ export function BranchList() {
               <Plus className="h-3 w-3" />
             </Button>
           }
-          onCheckout={checkoutBranch}
+          onCheckout={handleCheckout}
           onDelete={setBranchToDelete}
           onMerge={mergeBranch}
         />
@@ -190,38 +190,50 @@ export function BranchList() {
           title="Remote"
           branches={remoteBranches}
           className="py-2 border-t"
-          onCheckout={checkoutBranch}
+          onCheckout={handleCheckout}
           onDelete={() => {}}
           onMerge={() => {}}
         />
       </ScrollArea>
 
-      <Dialog open={branchToDelete !== null} onOpenChange={(open) => { if (!open) setBranchToDelete(null); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete branch</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-foreground">{branchToDelete}</span>? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBranchToDelete(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (branchToDelete) {
-                  deleteBranch(branchToDelete);
-                }
-                setBranchToDelete(null);
-              }}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={branchToCheckout !== null}
+        onOpenChange={(open) => { if (!open) setBranchToCheckout(null); }}
+        title="Switch branch"
+        description={
+          <>
+            Are you sure you want to switch to <span className="font-semibold text-foreground">{branchToCheckout}</span>? Any uncommitted changes may be affected.
+          </>
+        }
+        confirmLabel="Switch"
+        onConfirm={() => {
+          if (branchToCheckout) {
+            checkoutBranch(branchToCheckout);
+          }
+          setBranchToCheckout(null);
+        }}
+        onCancel={() => setBranchToCheckout(null)}
+      />
+
+      <ConfirmDialog
+        open={branchToDelete !== null}
+        onOpenChange={(open) => { if (!open) setBranchToDelete(null); }}
+        title="Delete branch"
+        description={
+          <>
+            Are you sure you want to delete <span className="font-semibold text-foreground">{branchToDelete}</span>? This action cannot be undone.
+          </>
+        }
+        confirmLabel="Delete"
+        confirmVariant="destructive"
+        onConfirm={() => {
+          if (branchToDelete) {
+            deleteBranch(branchToDelete);
+          }
+          setBranchToDelete(null);
+        }}
+        onCancel={() => setBranchToDelete(null)}
+      />
     </div>
   );
 }

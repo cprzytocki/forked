@@ -12,6 +12,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { BranchList } from '@/components/branch/BranchList';
 import { Button } from '@/components/common/Button';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import type { FileStatus } from '@/lib/types';
 import { cn, getFileName, getStatusColor, getStatusIcon } from '@/lib/utils';
@@ -132,6 +133,7 @@ function FileSection({
   onUnstageAll,
 }: FileSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [fileToDiscard, setFileToDiscard] = useState<string | null>(null);
   const { selectedFilePath, isSelectedFileStaged, selectFile } = useUiStore();
   const { stageFile, unstageFile, discardChanges } = useRepoStore();
 
@@ -150,7 +152,6 @@ function FileSection({
           <ChevronRight className="h-4 w-4" />
         )}
         <span className="flex-1 text-sm font-medium">{title}</span>
-        <span className="text-xs text-muted-foreground">{files.length}</span>
         {isStaged ? (
           <Button
             variant="ghost"
@@ -195,11 +196,31 @@ function FileSection({
               onSelect={() => selectFile(file, isStaged)}
               onStage={() => stageFile(file.path)}
               onUnstage={() => unstageFile(file.path)}
-              onDiscard={() => discardChanges(file.path)}
+              onDiscard={() => setFileToDiscard(file.path)}
             />
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={fileToDiscard !== null}
+        onOpenChange={(open) => { if (!open) setFileToDiscard(null); }}
+        title="Discard changes"
+        description={
+          <>
+            Are you sure you want to discard changes to <span className="font-semibold text-foreground">{fileToDiscard && getFileName(fileToDiscard)}</span>? This action cannot be undone.
+          </>
+        }
+        confirmLabel="Discard"
+        confirmVariant="destructive"
+        onConfirm={() => {
+          if (fileToDiscard) {
+            discardChanges(fileToDiscard);
+          }
+          setFileToDiscard(null);
+        }}
+        onCancel={() => setFileToDiscard(null)}
+      />
     </div>
   );
 }
@@ -263,6 +284,7 @@ export function Sidebar() {
   const conflictedFiles = status?.conflicted || [];
 
   const hasStaged = stagedFiles.length > 0;
+  const totalChanges = stagedFiles.length + unstagedFiles.length + conflictedFiles.length;
 
   return (
     <div className="flex flex-col h-full border-r">
@@ -281,6 +303,9 @@ export function Sidebar() {
           >
             <tab.icon className="h-4 w-4" />
             {tab.label}
+            {tab.id === 'changes' && totalChanges > 0 && (
+              <span className="text-xs text-muted-foreground">({totalChanges})</span>
+            )}
           </button>
         ))}
       </div>
