@@ -1,4 +1,6 @@
-import { Check, Cloud, GitBranch, GitMerge, Plus, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Trash2 } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import type { BranchInfo } from '@/lib/types';
@@ -23,7 +25,7 @@ function BranchItem({
     <button
       type="button"
       className={cn(
-        'group flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer w-full text-left',
+        'group flex items-center gap-2 px-2 py-1.5 hover:bg-accent cursor-pointer w-full text-left',
         branch.is_head && 'bg-accent',
       )}
       onClick={onCheckout}
@@ -69,6 +71,68 @@ function BranchItem({
   );
 }
 
+interface BranchSectionProps {
+  title: string;
+  branches: BranchInfo[];
+  defaultExpanded?: boolean;
+  className?: string;
+  action?: React.ReactNode;
+  onCheckout: (name: string) => void;
+  onDelete: (name: string) => void;
+  onMerge: (name: string) => void;
+}
+
+function BranchSection({
+  title,
+  branches,
+  defaultExpanded = true,
+  className,
+  action,
+  onCheckout,
+  onDelete,
+  onMerge,
+}: BranchSectionProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  if (branches.length === 0) return null;
+
+  return (
+    <div className={className}>
+      <div className="flex items-center gap-1 px-2 py-1">
+        <button
+          type="button"
+          className="flex flex-1 items-center gap-1 cursor-pointer hover:bg-accent rounded-sm text-left"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+          <span className="flex-1 text-xs font-medium text-muted-foreground">
+            {title}
+          </span>
+          <span className="text-xs text-muted-foreground">{branches.length}</span>
+        </button>
+        {action}
+      </div>
+      {isExpanded && (
+        <div>
+          {branches.map((branch) => (
+            <BranchItem
+              key={branch.name}
+              branch={branch}
+              onCheckout={() => onCheckout(branch.name)}
+              onDelete={() => onDelete(branch.name)}
+              onMerge={() => onMerge(branch.name)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function BranchList() {
   const { branches, checkoutBranch, deleteBranch, mergeBranch } =
     useRepoStore();
@@ -79,55 +143,35 @@ export function BranchList() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-2 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <GitBranch className="h-4 w-4" />
-          <span className="font-semibold text-sm">Branches</span>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={openCreateBranchDialog}
-          title="Create branch"
-          aria-label="Create branch"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
       <ScrollArea className="flex-1">
-        {localBranches.length > 0 && (
-          <div className="py-2">
-            <div className="px-3 py-1 text-xs font-medium text-muted-foreground">
-              Local
-            </div>
-            {localBranches.map((branch) => (
-              <BranchItem
-                key={branch.name}
-                branch={branch}
-                onCheckout={() => checkoutBranch(branch.name)}
-                onDelete={() => deleteBranch(branch.name)}
-                onMerge={() => mergeBranch(branch.name)}
-              />
-            ))}
-          </div>
-        )}
-        {remoteBranches.length > 0 && (
-          <div className="py-2 border-t">
-            <div className="px-3 py-1 text-xs font-medium text-muted-foreground">
-              Remote
-            </div>
-            {remoteBranches.map((branch) => (
-              <BranchItem
-                key={branch.name}
-                branch={branch}
-                onCheckout={() => checkoutBranch(branch.name)}
-                onDelete={() => {}}
-                onMerge={() => {}}
-              />
-            ))}
-          </div>
-        )}
+        <BranchSection
+          title="Local"
+          branches={localBranches}
+          className="py-2"
+          action={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5"
+              onClick={openCreateBranchDialog}
+              title="Create branch"
+              aria-label="Create branch"
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          }
+          onCheckout={checkoutBranch}
+          onDelete={deleteBranch}
+          onMerge={mergeBranch}
+        />
+        <BranchSection
+          title="Remote"
+          branches={remoteBranches}
+          className="py-2 border-t"
+          onCheckout={checkoutBranch}
+          onDelete={() => {}}
+          onMerge={() => {}}
+        />
       </ScrollArea>
     </div>
   );

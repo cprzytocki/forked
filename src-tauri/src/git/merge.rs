@@ -96,7 +96,15 @@ pub fn create_branch(repo: &Repository, name: &str) -> Result<BranchInfo, GitCli
 pub fn checkout_branch(repo: &Repository, name: &str) -> Result<(), GitClientError> {
     let (object, reference) = repo.revparse_ext(name)?;
 
-    repo.checkout_tree(&object, None)?;
+    repo.checkout_tree(&object, None).map_err(|e| {
+        if e.code() == git2::ErrorCode::Conflict {
+            GitClientError::Operation(
+                "Cannot switch branches: you have uncommitted changes that would be overwritten. Commit or stash them first.".into(),
+            )
+        } else {
+            GitClientError::Git(e)
+        }
+    })?;
 
     match reference {
         Some(gref) => repo.set_head(gref.name().ok_or_else(|| {

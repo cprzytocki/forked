@@ -2,17 +2,21 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  FileText,
+  GitBranch,
   Minus,
   Plus,
   RotateCcw,
 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { BranchList } from '@/components/branch/BranchList';
 import { Button } from '@/components/common/Button';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import type { FileStatus } from '@/lib/types';
 import { cn, getFileName, getStatusColor, getStatusIcon } from '@/lib/utils';
 import { useRepoStore } from '@/stores/repoStore';
+import type { SidebarTab } from '@/stores/uiStore';
 import { useUiStore } from '@/stores/uiStore';
 
 interface FileItemProps {
@@ -242,8 +246,14 @@ function CommitBox({ onCommit, disabled }: CommitBoxProps) {
   );
 }
 
+const tabs: { id: SidebarTab; label: string; icon: typeof FileText }[] = [
+  { id: 'changes', label: 'Changes', icon: FileText },
+  { id: 'branches', label: 'Branches', icon: GitBranch },
+];
+
 export function Sidebar() {
   const { status, stageAll, unstageAll, createCommit } = useRepoStore();
+  const { sidebarTab, setSidebarTab } = useUiStore();
 
   const stagedFiles = status?.staged || [];
   const unstagedFiles = [
@@ -256,33 +266,55 @@ export function Sidebar() {
 
   return (
     <div className="flex flex-col h-full border-r">
-      <div className="p-2 border-b">
-        <h2 className="font-semibold text-sm">Changes</h2>
+      <div className="flex border-b">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-sm font-medium transition-colors',
+              sidebarTab === tab.id
+                ? 'text-foreground border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setSidebarTab(tab.id)}
+          >
+            <tab.icon className="h-4 w-4" />
+            {tab.label}
+          </button>
+        ))}
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          {conflictedFiles.length > 0 && (
-            <FileSection
-              title="Conflicts"
-              files={conflictedFiles}
-              isStaged={false}
-            />
-          )}
-          <FileSection
-            title="Staged Changes"
-            files={stagedFiles}
-            isStaged={true}
-            onUnstageAll={unstageAll}
-          />
-          <FileSection
-            title="Changes"
-            files={unstagedFiles}
-            isStaged={false}
-            onStageAll={stageAll}
-          />
-        </div>
-      </ScrollArea>
-      <CommitBox onCommit={createCommit} disabled={!hasStaged} />
+
+      {sidebarTab === 'changes' ? (
+        <>
+          <ScrollArea className="flex-1">
+            <div className="p-2">
+              {conflictedFiles.length > 0 && (
+                <FileSection
+                  title="Conflicts"
+                  files={conflictedFiles}
+                  isStaged={false}
+                />
+              )}
+              <FileSection
+                title="Staged Changes"
+                files={stagedFiles}
+                isStaged={true}
+                onUnstageAll={unstageAll}
+              />
+              <FileSection
+                title="Changes"
+                files={unstagedFiles}
+                isStaged={false}
+                onStageAll={stageAll}
+              />
+            </div>
+          </ScrollArea>
+          <CommitBox onCommit={createCommit} disabled={!hasStaged} />
+        </>
+      ) : (
+        <BranchList />
+      )}
     </div>
   );
 }

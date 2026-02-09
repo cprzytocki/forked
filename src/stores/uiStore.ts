@@ -2,12 +2,14 @@ import { create } from 'zustand';
 import * as tauri from '@/lib/tauri';
 import type { CommitDiff, FileDiff, FileStatus } from '@/lib/types';
 
-export type ViewMode = 'changes' | 'history' | 'branches';
+export type ViewMode = 'changes' | 'history';
+export type SidebarTab = 'changes' | 'branches';
 export type DetailView = 'diff' | 'commit' | 'none';
 
 interface UiState {
   // View state
   viewMode: ViewMode;
+  sidebarTab: SidebarTab;
   detailView: DetailView;
 
   // Selection state
@@ -32,6 +34,7 @@ interface UiState {
 
   // Actions
   setViewMode: (mode: ViewMode) => void;
+  setSidebarTab: (tab: SidebarTab) => void;
   setDetailView: (view: DetailView) => void;
   selectFile: (file: FileStatus | null, staged: boolean) => void;
   loadFileDiff: (path: string, staged: boolean) => Promise<void>;
@@ -57,6 +60,7 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set, get) => ({
   viewMode: 'changes',
+  sidebarTab: 'changes',
   detailView: 'none',
   selectedFile: null,
   selectedFilePath: null,
@@ -72,6 +76,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   theme: 'dark',
 
   setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
+  setSidebarTab: (tab: SidebarTab) => set({ sidebarTab: tab }),
   setDetailView: (view: DetailView) => set({ detailView: view }),
 
   selectFile: (file: FileStatus | null, staged: boolean) => {

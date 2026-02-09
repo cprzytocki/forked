@@ -1,6 +1,5 @@
 import { listen } from '@tauri-apps/api/event';
 import { useCallback, useEffect, useRef } from 'react';
-import { BranchList } from '@/components/branch/BranchList';
 import { CreateBranchDialog } from '@/components/branch/CreateBranchDialog';
 import { DetailsPanel } from '@/components/layout/DetailsPanel';
 import { Header } from '@/components/layout/Header';
@@ -16,7 +15,7 @@ import { useUiStore } from '@/stores/uiStore';
 
 function App() {
   const { repoInfo, error, clearError } = useRepoStore();
-  const { theme, viewMode, detailView, isDiffLoading } = useUiStore();
+  const { theme, detailView, isDiffLoading } = useUiStore();
   const {
     addRecentRepo,
     sidebarWidth,
@@ -129,9 +128,9 @@ function App() {
               ref={containerRef}
               className="flex-1 flex flex-col overflow-hidden"
             >
-              {/* Top panel - History or Branches */}
+              {/* Top panel - History */}
               <div className="flex-1 min-h-0 overflow-hidden">
-                {viewMode === 'branches' ? <BranchList /> : <MainPanel />}
+                <MainPanel />
               </div>
 
               {/* Draggable divider + Details panel */}
