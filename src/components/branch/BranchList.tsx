@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Star, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, ChevronRight, Cloud, GitBranch, GitMerge, Plus, Star, Trash2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
@@ -69,7 +69,7 @@ function BranchItem({
             title="Checkout branch"
             aria-label="Checkout branch"
           >
-            <ArrowRightLeft className="h-3 w-3" />
+            <ArrowRight className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
