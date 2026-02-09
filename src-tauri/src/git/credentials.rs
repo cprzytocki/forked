@@ -1,16 +1,102 @@
 use git2::{Cred, FetchOptions, PushOptions, RemoteCallbacks};
+use std::cell::Cell;
+use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
 pub fn get_callbacks<'a>() -> RemoteCallbacks<'a> {
     let mut callbacks = RemoteCallbacks::new();
 
-    callbacks.credentials(|_url, username, allowed| {
+    let attempt = Cell::new(0u32);
+
+    callbacks.credentials(move |url, username, allowed| {
+        let tries = attempt.get();
+        if tries >= 5 {
+            return Err(git2::Error::from_str(
+                "too many credential attempts — no valid credentials found",
+            ));
+        }
+        attempt.set(tries + 1);
+
+        let user = username.unwrap_or("git");
+
         if allowed.contains(git2::CredentialType::SSH_KEY) {
-            let user = username.unwrap_or("git");
-            // Try SSH agent first
-            Cred::ssh_key_from_agent(user)
+            // Try SSH agent first (attempt 0)
+            if tries == 0 {
+                if let Ok(cred) = Cred::ssh_key_from_agent(user) {
+                    return Ok(cred);
+                }
+            }
+
+            // Try common SSH key files from disk
+            let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("~"));
+            let ssh_dir = home.join(".ssh");
+            let key_names = ["id_ed25519", "id_rsa", "id_ecdsa"];
+
+            // Map attempts 1..=3 to key files (attempt 0 was ssh-agent)
+            let key_index = if tries == 0 { 0 } else { tries as usize - 1 };
+            if key_index < key_names.len() {
+                let key_name = key_names[key_index];
+                let privkey = ssh_dir.join(key_name);
+                let pubkey = ssh_dir.join(format!("{}.pub", key_name));
+
+                if privkey.exists() {
+                    let pubkey_ref = if pubkey.exists() {
+                        Some(pubkey.as_path())
+                    } else {
+                        None
+                    };
+                    if let Ok(cred) = Cred::ssh_key(user, pubkey_ref, &privkey, None) {
+                        return Ok(cred);
+                    }
+                }
+            }
+
+            Err(git2::Error::from_str("no SSH credentials found"))
         } else if allowed.contains(git2::CredentialType::USER_PASS_PLAINTEXT) {
-            // Fallback to credential helper or default
-            Cred::credential_helper(&git2::Config::open_default()?, _url, username)
+            // Try git2's built-in credential helper first
+            if tries == 0 {
+                if let Ok(config) = git2::Config::open_default() {
+                    if let Ok(cred) = Cred::credential_helper(&config, url, username) {
+                        return Ok(cred);
+                    }
+                }
+            }
+
+            // Fallback: shell out to `git credential fill` which properly
+            // handles system credential helpers (osxkeychain, manager-core, etc.)
+            let input = format!("url={}\n\n", url);
+            if let Ok(output) = Command::new("git")
+                .args(["credential", "fill"])
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::null())
+                .spawn()
+                .and_then(|mut child| {
+                    use std::io::Write;
+                    if let Some(ref mut stdin) = child.stdin {
+                        let _ = stdin.write_all(input.as_bytes());
+                    }
+                    child.wait_with_output()
+                })
+            {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                let mut cred_username = String::new();
+                let mut cred_password = String::new();
+                for line in stdout.lines() {
+                    if let Some(val) = line.strip_prefix("username=") {
+                        cred_username = val.to_string();
+                    } else if let Some(val) = line.strip_prefix("password=") {
+                        cred_password = val.to_string();
+                    }
+                }
+                if !cred_username.is_empty() && !cred_password.is_empty() {
+                    return Cred::userpass_plaintext(&cred_username, &cred_password);
+                }
+            }
+
+            Err(git2::Error::from_str(
+                "no credentials found — configure a Git credential helper or use SSH",
+            ))
         } else if allowed.contains(git2::CredentialType::DEFAULT) {
             Cred::default()
         } else {
