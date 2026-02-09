@@ -11,6 +11,7 @@ import type { CommitGraphEntry, CommitInfo } from '@/lib/types';
 import { cn, formatRelativeTime, getBranchColorHsl } from '@/lib/utils';
 import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
+import { useBranches } from '@/hooks/useBranches';
 
 interface CommitItemProps {
   entry: CommitGraphEntry;
@@ -132,6 +133,8 @@ export function MainPanel() {
     loadCommitDiff(commit.id);
   };
 
+  const branch = useBranches().branches.find((branch)=> branch.name === currentBranch)
+
   // IntersectionObserver to detect when the sentinel scrolls into view.
   // We read fresh state inside the callback to avoid stale closures.
   // Re-attach the observer whenever commits change or hasMoreCommits changes.
@@ -173,6 +176,16 @@ export function MainPanel() {
         <span className="font-semibold text-sm">
           {currentBranch || 'No branch'}
         </span>
+        {branch?.ahead != null && branch.ahead > 0 && (
+          <span className="font-mono text-xs shrink-0 text-git-added" title={`${branch.ahead} commit${branch.ahead === 1 ? '' : 's'} ahead of upstream (to push)`}>
+            ↑{branch.ahead}
+          </span>
+        )}
+        {branch?.behind != null && branch.behind > 0 && (
+          <span className="font-mono text-xs shrink-0 text-git-renamed" title={`${branch.behind} commit${branch.behind === 1 ? '' : 's'} behind upstream (to pull)`}>
+            ↓{branch.behind}
+          </span>
+        )}
         <span className="text-xs text-muted-foreground ml-auto">
           {commits.length}
           {hasMoreCommits ? '+' : ''} commits
