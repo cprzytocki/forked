@@ -43,6 +43,7 @@ jobs:
 
   build:
     needs: version
+    if: needs.version.outputs.exists == 'false'
     strategy:
       fail-fast: false
       matrix:
