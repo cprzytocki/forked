@@ -166,3 +166,18 @@ jobs:
           name: Forked ${{ needs.version.outputs.tag }}
           generate_release_notes: true
           files: artifacts/**/*
+          append_body: true
+          body: |
+
+            ---
+
+            ## Installation
+
+            **macOS:** The app is not code-signed. After mounting the `.dmg` and copying Forked to Applications, run:
+            ```
+            xattr -cr /Applications/Forked.app
+            ```
+
+            **Windows:** You may see a SmartScreen warning — click "More info" → "Run anyway".
+
+            **Linux:** No extra steps needed.
