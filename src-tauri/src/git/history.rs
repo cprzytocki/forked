@@ -275,7 +275,7 @@ pub fn get_commit_history(
             revwalk.push_head()?;
         }
     }
-    revwalk.set_sorting(Sort::TIME)?;
+    revwalk.set_sorting(Sort::TOPOLOGICAL | Sort::TIME)?;
 
     let commits: Vec<CommitInfo> = revwalk
         .skip(skip)
