@@ -53,6 +53,7 @@ interface RepoState {
   stageAll: () => Promise<void>;
   unstageAll: () => Promise<void>;
   discardChanges: (path: string) => Promise<void>;
+  discardAll: () => Promise<void>;
 
   // Commit actions
   createCommit: (message: string) => Promise<void>;
@@ -278,6 +279,15 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   discardChanges: async (path: string) => {
     try {
       await tauri.discardChanges(path);
+      await get().refreshStatus();
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+
+  discardAll: async () => {
+    try {
+      await tauri.discardAllChanges();
       await get().refreshStatus();
     } catch (e) {
       set({ error: String(e) });

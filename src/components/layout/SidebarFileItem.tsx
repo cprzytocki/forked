@@ -65,19 +65,6 @@ export function SidebarFileItem({
           </Button>
         ) : (
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-5 w-5"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStage?.();
-              }}
-              title="Stage"
-              aria-label="Stage"
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
             {!file.is_new && (
               <Button
                 variant="ghost"
@@ -93,6 +80,19 @@ export function SidebarFileItem({
                 <RotateCcw className="h-3 w-3" />
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStage?.();
+              }}
+              title="Stage"
+              aria-label="Stage"
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
           </>
         )}
       </div>

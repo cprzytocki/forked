@@ -14,7 +14,8 @@ const tabs: { id: SidebarTab; label: string; icon: typeof FileText }[] = [
 ];
 
 export function Sidebar() {
-  const { status, stageAll, unstageAll, createCommit } = useRepoStore();
+  const { status, stageAll, unstageAll, discardAll, createCommit } =
+    useRepoStore();
   const { sidebarTab, setSidebarTab } = useUiStore();
 
   const stagedFiles = status?.staged || [];
@@ -76,6 +77,7 @@ export function Sidebar() {
                 files={unstagedFiles}
                 isStaged={false}
                 onStageAll={stageAll}
+                onDiscardAll={discardAll}
               />
             </div>
           </ScrollArea>

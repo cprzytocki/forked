@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Minus, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Minus, Plus, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -14,6 +14,7 @@ interface SidebarFileSectionProps {
   isStaged: boolean;
   onStageAll?: () => void;
   onUnstageAll?: () => void;
+  onDiscardAll?: () => void;
 }
 
 export function SidebarFileSection({
@@ -22,9 +23,11 @@ export function SidebarFileSection({
   isStaged,
   onStageAll,
   onUnstageAll,
+  onDiscardAll,
 }: SidebarFileSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [fileToDiscard, setFileToDiscard] = useState<string | null>(null);
+  const [discardAllConfirmOpen, setDiscardAllConfirmOpen] = useState(false);
   const { selectedFilePath, isSelectedFileStaged, selectFile } = useUiStore();
   const { stageFile, unstageFile, discardChanges } = useRepoStore();
 
@@ -57,20 +60,39 @@ export function SidebarFileSection({
           >
             <Minus className="h-3 w-3" />
           </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5"
-            onClick={(e) => {
-              e.stopPropagation();
-              onStageAll?.();
-            }}
-            title="Stage all"
-            aria-label="Stage all"
-          >
-            <Plus className="h-3 w-3" />
-          </Button>
+        ) : (onStageAll || onDiscardAll) && (
+          <div className="flex items-center gap-1">
+            {onDiscardAll && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDiscardAllConfirmOpen(true);
+                }}
+                title="Discard all"
+                aria-label="Discard all"
+              >
+                <RotateCcw className="h-3 w-3" />
+              </Button>
+            )}
+            {onStageAll && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStageAll();
+                }}
+                title="Stage all"
+                aria-label="Stage all"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         )}
       </button>
       {isExpanded && (
@@ -117,6 +139,19 @@ export function SidebarFileSection({
           setFileToDiscard(null);
         }}
         onCancel={() => setFileToDiscard(null)}
+      />
+      <ConfirmDialog
+        open={discardAllConfirmOpen}
+        onOpenChange={(open) => setDiscardAllConfirmOpen(open)}
+        title="Discard all changes"
+        description="Are you sure you want to discard all unstaged changes? This action cannot be undone."
+        confirmLabel="Discard All"
+        confirmVariant="destructive"
+        onConfirm={() => {
+          onDiscardAll?.();
+          setDiscardAllConfirmOpen(false);
+        }}
+        onCancel={() => setDiscardAllConfirmOpen(false)}
       />
     </div>
   );
