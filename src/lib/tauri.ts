@@ -100,8 +100,11 @@ export async function resetToCommit(commitId: string, mode: 'soft' | 'hard'): Pr
   return invoke('reset_to_commit', { commitId, mode });
 }
 
-export async function squashCommits(commitIds: string[]): Promise<void> {
-  return invoke('squash_commits', { commitIds });
+export async function squashCommits(
+  commitIds: string[],
+  message: string,
+): Promise<void> {
+  return invoke('squash_commits', { commitIds, message });
 }
 
 // Branch commands

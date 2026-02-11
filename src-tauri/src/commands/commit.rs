@@ -136,6 +136,7 @@ pub fn reset_to_commit(
 #[tauri::command]
 pub fn squash_commits(
     commit_ids: Vec<String>,
+    message: String,
     state: State<AppState>,
 ) -> Result<(), GitClientError> {
     let guard = state.repo.lock();
@@ -143,5 +144,5 @@ pub fn squash_commits(
         .repository
         .as_ref()
         .ok_or(GitClientError::NoRepository)?;
-    git::squash_commits(repo, &commit_ids)
+    git::squash_commits(repo, &commit_ids, &message)
 }

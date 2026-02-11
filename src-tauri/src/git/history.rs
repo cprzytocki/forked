@@ -422,7 +422,11 @@ pub fn create_commit(repo: &Repository, message: &str) -> Result<CommitInfo, Git
     Ok(commit_to_info(&commit))
 }
 
-pub fn squash_commits(repo: &Repository, commit_ids: &[String]) -> Result<(), GitClientError> {
+pub fn squash_commits(
+    repo: &Repository,
+    commit_ids: &[String],
+    message: &str,
+) -> Result<(), GitClientError> {
     if commit_ids.len() < 2 {
         return Err(GitClientError::Operation(
             "Select at least two commits to squash".to_string(),
@@ -548,10 +552,14 @@ pub fn squash_commits(repo: &Repository, commit_ids: &[String]) -> Result<(), Gi
             message_parts.push(message.to_string());
         }
     }
-    let squash_message = if message_parts.is_empty() {
-        "Squashed commit".to_string()
+    let squash_message = if message.trim().is_empty() {
+        if message_parts.is_empty() {
+            "Squashed commit".to_string()
+        } else {
+            message_parts.join("\n\n")
+        }
     } else {
-        message_parts.join("\n\n")
+        message.to_string()
     };
     let squash_tree = repo.find_commit(newest_selected_oid)?.tree()?;
     let signature = repo.signature()?;

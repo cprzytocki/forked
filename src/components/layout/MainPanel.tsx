@@ -1,11 +1,20 @@
 import { GitBranch, GitCommit, Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useBranches } from '@/hooks/useBranches';
+import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import {
   ContextMenu,
   ContextMenuItem,
 } from '@/components/common/ContextMenu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/common/Dialog';
 import { ScrollArea } from '@/components/common/ScrollArea';
 import { CommitGraph } from '@/components/history/CommitGraph';
 import type { CommitGraphEntry, CommitInfo } from '@/lib/types';
@@ -113,7 +122,8 @@ export function MainPanel() {
 
   const [squashConfirm, setSquashConfirm] = useState<{
     commitIds: string[];
-    count: number;
+    commits: CommitInfo[];
+    message: string;
   } | null>(null);
 
   const canReset = viewingBranch === null || viewingBranch === currentBranch;
@@ -353,9 +363,16 @@ export function MainPanel() {
           {canSquashSelection && (
             <ContextMenuItem
               onClick={() => {
+                const commitsOldToNew = selectedInOrder
+                  .map((entry) => entry.commit)
+                  .reverse();
                 setSquashConfirm({
                   commitIds: selectedInOrder.map((entry) => entry.id),
-                  count: selectedInOrder.length,
+                  commits: commitsOldToNew,
+                  message: commitsOldToNew
+                    .map((commit) => commit.message.trim())
+                    .filter((message) => message.length > 0)
+                    .join('\n\n'),
                 });
                 setContextMenu(null);
               }}
@@ -428,31 +445,81 @@ export function MainPanel() {
         onCancel={() => setResetConfirm(null)}
       />
 
-      <ConfirmDialog
+      <Dialog
         open={squashConfirm !== null}
         onOpenChange={(open) => {
           if (!open) setSquashConfirm(null);
         }}
-        title="Squash Commits"
-        description={
-          <>
-            Squash {squashConfirm?.count} selected commits into one commit? This
-            rewrites history and will require a force push if commits were already
-            pushed.
-          </>
-        }
-        confirmLabel="Squash"
-        confirmVariant="destructive"
-        onConfirm={() => {
-          if (squashConfirm) {
-            squashCommits(squashConfirm.commitIds);
-            setSelectedCommitIds(new Set());
-            setSelectionAnchorId(null);
-          }
-          setSquashConfirm(null);
-        }}
-        onCancel={() => setSquashConfirm(null)}
-      />
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Squash Commits</DialogTitle>
+            <DialogDescription>
+              These commits will be squashed into one. Edit the new commit
+              message below.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="max-h-32 overflow-auto rounded-md border bg-muted/20 p-2">
+              <ul className="space-y-1.5">
+                {squashConfirm?.commits.map((commit) => (
+                  <li
+                    key={commit.id}
+                    className="text-xs text-muted-foreground"
+                  >
+                    <span className="font-mono mr-2">{commit.short_id}</span>
+                    <span className="text-foreground">{commit.summary}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <label
+                htmlFor="squash-message"
+                className="text-sm font-medium text-foreground"
+              >
+                New commit message
+              </label>
+              <textarea
+                id="squash-message"
+                className="mt-1 w-full h-36 p-2 text-sm bg-background border rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                value={squashConfirm?.message ?? ''}
+                onChange={(e) =>
+                  setSquashConfirm((previous) =>
+                    previous
+                      ? { ...previous, message: e.target.value }
+                      : previous,
+                  )
+                }
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              This rewrites history and may require a force push.
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSquashConfirm(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!squashConfirm?.message.trim()}
+              onClick={() => {
+                if (squashConfirm) {
+                  squashCommits(squashConfirm.commitIds, squashConfirm.message);
+                  setSelectedCommitIds(new Set());
+                  setSelectionAnchorId(null);
+                }
+                setSquashConfirm(null);
+              }}
+            >
+              Squash
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

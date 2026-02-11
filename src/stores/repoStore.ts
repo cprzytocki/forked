@@ -58,7 +58,7 @@ interface RepoState {
   createCommit: (message: string) => Promise<void>;
   selectCommit: (commit: CommitInfo | null) => void;
   resetToCommit: (commitId: string, mode: 'soft' | 'hard') => Promise<void>;
-  squashCommits: (commitIds: string[]) => Promise<void>;
+  squashCommits: (commitIds: string[], message: string) => Promise<void>;
 
   // Branch actions
   createBranch: (name: string, sourceBranch?: string) => Promise<void>;
@@ -297,9 +297,9 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     }
   },
 
-  squashCommits: async (commitIds: string[]) => {
+  squashCommits: async (commitIds: string[], message: string) => {
     try {
-      await tauri.squashCommits(commitIds);
+      await tauri.squashCommits(commitIds, message);
       await get().refreshAll();
     } catch (e) {
       set({ error: String(e) });
