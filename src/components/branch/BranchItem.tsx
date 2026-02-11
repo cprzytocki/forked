@@ -6,6 +6,7 @@ import {
   GitMerge,
   Star,
   Trash2,
+  UploadCloud,
 } from 'lucide-react';
 import { BranchTrackingIndicators } from '@/components/branch/BranchTrackingIndicators';
 import { Button } from '@/components/common/Button';
@@ -41,6 +42,14 @@ export function BranchItem({
     >
       {branch.is_remote ? (
         <Cloud className="h-4 w-4 text-muted-foreground" />
+      ) : branch.upstream === null ? (
+        <span
+          className="text-muted-foreground"
+          title="Branch is not tracking a remote branch yet"
+          aria-label="Branch is not tracking a remote branch yet"
+        >
+          <UploadCloud className="h-4 w-4" />
+        </span>
       ) : (
         <GitBranch className="h-4 w-4 text-muted-foreground" />
       )}
