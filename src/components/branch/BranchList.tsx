@@ -8,29 +8,13 @@ import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
 
 export function BranchList() {
-  const {
-    branches,
-    checkoutBranch,
-    deleteBranch,
-    mergeBranch,
-    viewBranchCommits,
-    viewingBranch,
-  } = useRepoStore();
+  const { branches, checkoutBranch, deleteBranch } = useRepoStore();
   const { openCreateBranchDialog } = useUiStore();
   const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
   const [branchToCheckout, setBranchToCheckout] = useState<string | null>(null);
 
   const localBranches = branches.filter((b) => !b.is_remote);
   const remoteBranches = branches.filter((b) => b.is_remote);
-
-  const handleSelect = (name: string) => {
-    const branch = branches.find((b) => b.name === name);
-    if (branch?.is_head) {
-      viewBranchCommits(null);
-    } else {
-      viewBranchCommits(name);
-    }
-  };
 
   const handleCheckout = (name: string) => {
     const branch = branches.find((b) => b.name === name);
@@ -44,7 +28,6 @@ export function BranchList() {
         <BranchSection
           title="Local"
           branches={localBranches}
-          viewingBranch={viewingBranch}
           className="py-2"
           action={
             <Button
@@ -58,20 +41,15 @@ export function BranchList() {
               <Plus className="h-3 w-3" />
             </Button>
           }
-          onSelect={handleSelect}
           onCheckout={handleCheckout}
           onDelete={setBranchToDelete}
-          onMerge={mergeBranch}
         />
         <BranchSection
           title="Remote"
           branches={remoteBranches}
-          viewingBranch={viewingBranch}
           className="py-2 border-t"
-          onSelect={handleSelect}
           onCheckout={handleCheckout}
           onDelete={() => {}}
-          onMerge={() => {}}
         />
       </ScrollArea>
 

@@ -7,27 +7,21 @@ import type { BranchInfo } from '@/lib/types';
 interface BranchSectionProps {
   title: string;
   branches: BranchInfo[];
-  viewingBranch: string | null;
   defaultExpanded?: boolean;
   className?: string;
   action?: React.ReactNode;
-  onSelect: (name: string) => void;
   onCheckout: (name: string) => void;
   onDelete: (name: string) => void;
-  onMerge: (name: string) => void;
 }
 
 export function BranchSection({
   title,
   branches,
-  viewingBranch,
   defaultExpanded = true,
   className,
   action,
-  onSelect,
   onCheckout,
   onDelete,
-  onMerge,
 }: BranchSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
@@ -61,11 +55,8 @@ export function BranchSection({
             <BranchItem
               key={branch.name}
               branch={branch}
-              isViewing={viewingBranch === branch.name}
-              onSelect={() => onSelect(branch.name)}
               onCheckout={() => onCheckout(branch.name)}
               onDelete={() => onDelete(branch.name)}
-              onMerge={() => onMerge(branch.name)}
             />
           ))}
         </div>

@@ -2,26 +2,25 @@ import { Minus, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import type { FileStatus } from '@/lib/types';
 import { cn, getFileName, getStatusColor, getStatusIcon } from '@/lib/utils';
+import { useRepoStore } from '@/stores/repoStore';
+import { useUiStore } from '@/stores/uiStore';
 
 interface SidebarFileItemProps {
   file: FileStatus;
-  isSelected: boolean;
   isStaged: boolean;
-  onSelect: () => void;
-  onStage?: () => void;
-  onUnstage?: () => void;
   onDiscard?: () => void;
 }
 
 export function SidebarFileItem({
   file,
-  isSelected,
   isStaged,
-  onSelect,
-  onStage,
-  onUnstage,
   onDiscard,
 }: SidebarFileItemProps) {
+  const { selectedFilePath, isSelectedFileStaged, selectFile } = useUiStore();
+  const { stageFile, unstageFile } = useRepoStore();
+  const isSelected =
+    selectedFilePath === file.path && isSelectedFileStaged === isStaged;
+
   return (
     <button
       type="button"
@@ -29,7 +28,7 @@ export function SidebarFileItem({
         'group flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm w-full text-left',
         isSelected && 'bg-accent',
       )}
-      onClick={onSelect}
+      onClick={() => selectFile(file, isStaged)}
     >
       <span
         className={cn(
@@ -56,7 +55,7 @@ export function SidebarFileItem({
             className="h-5 w-5"
             onClick={(e) => {
               e.stopPropagation();
-              onUnstage?.();
+              unstageFile(file.path);
             }}
             title="Unstage"
             aria-label="Unstage"
@@ -84,7 +83,7 @@ export function SidebarFileItem({
               className="h-5 w-5"
               onClick={(e) => {
                 e.stopPropagation();
-                onStage?.();
+                stageFile(file.path);
               }}
               title="Stage"
               aria-label="Stage"

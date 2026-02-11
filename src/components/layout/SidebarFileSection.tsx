@@ -1,4 +1,10 @@
-import { ChevronDown, ChevronRight, Minus, Plus, RotateCcw } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  Minus,
+  Plus,
+  RotateCcw,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -6,7 +12,6 @@ import { SidebarFileItem } from '@/components/layout/SidebarFileItem';
 import type { FileStatus } from '@/lib/types';
 import { getFileName } from '@/lib/utils';
 import { useRepoStore } from '@/stores/repoStore';
-import { useUiStore } from '@/stores/uiStore';
 
 interface SidebarFileSectionProps {
   title: string;
@@ -28,8 +33,7 @@ export function SidebarFileSection({
   const [isExpanded, setIsExpanded] = useState(true);
   const [fileToDiscard, setFileToDiscard] = useState<string | null>(null);
   const [discardAllConfirmOpen, setDiscardAllConfirmOpen] = useState(false);
-  const { selectedFilePath, isSelectedFileStaged, selectFile } = useUiStore();
-  const { stageFile, unstageFile, discardChanges } = useRepoStore();
+  const { discardChanges } = useRepoStore();
 
   if (files.length === 0) return null;
 
@@ -60,39 +64,41 @@ export function SidebarFileSection({
           >
             <Minus className="h-3 w-3" />
           </Button>
-        ) : (onStageAll || onDiscardAll) && (
-          <div className="flex items-center gap-1">
-            {onDiscardAll && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDiscardAllConfirmOpen(true);
-                }}
-                title="Discard all"
-                aria-label="Discard all"
-              >
-                <RotateCcw className="h-3 w-3" />
-              </Button>
-            )}
-            {onStageAll && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onStageAll();
-                }}
-                title="Stage all"
-                aria-label="Stage all"
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+        ) : (
+          (onStageAll || onDiscardAll) && (
+            <div className="flex items-center gap-1">
+              {onDiscardAll && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDiscardAllConfirmOpen(true);
+                  }}
+                  title="Discard all"
+                  aria-label="Discard all"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              )}
+              {onStageAll && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStageAll();
+                  }}
+                  title="Stage all"
+                  aria-label="Stage all"
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )
         )}
       </button>
       {isExpanded && (
@@ -101,14 +107,7 @@ export function SidebarFileSection({
             <SidebarFileItem
               key={file.path}
               file={file}
-              isSelected={
-                selectedFilePath === file.path &&
-                isSelectedFileStaged === isStaged
-              }
               isStaged={isStaged}
-              onSelect={() => selectFile(file, isStaged)}
-              onStage={() => stageFile(file.path)}
-              onUnstage={() => unstageFile(file.path)}
               onDiscard={() => setFileToDiscard(file.path)}
             />
           ))}

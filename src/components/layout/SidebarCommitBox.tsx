@@ -2,18 +2,16 @@ import { Check } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
+import { useRepoStore } from '@/stores/repoStore';
 
-interface CommitBoxProps {
-  onCommit: (message: string) => void;
-  disabled: boolean;
-}
-
-export function SidebarCommitBox({ onCommit, disabled }: CommitBoxProps) {
+export function SidebarCommitBox() {
   const [message, setMessage] = useState('');
+  const { createCommit, status } = useRepoStore();
+  const hasStaged = (status?.staged.length || 0) > 0;
 
   const handleCommit = () => {
     if (message.trim()) {
-      onCommit(message.trim());
+      createCommit(message.trim());
       setMessage('');
     }
   };
@@ -35,7 +33,7 @@ export function SidebarCommitBox({ onCommit, disabled }: CommitBoxProps) {
       />
       <Button
         className="w-full mt-2"
-        disabled={disabled || !message.trim()}
+        disabled={!hasStaged || !message.trim()}
         onClick={handleCommit}
       >
         <Check className="h-4 w-4 mr-2" />

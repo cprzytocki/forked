@@ -14,8 +14,7 @@ const tabs: { id: SidebarTab; label: string; icon: typeof FileText }[] = [
 ];
 
 export function Sidebar() {
-  const { status, stageAll, unstageAll, discardAll, createCommit } =
-    useRepoStore();
+  const { status, stageAll, unstageAll, discardAll } = useRepoStore();
   const { sidebarTab, setSidebarTab } = useUiStore();
 
   const stagedFiles = status?.staged || [];
@@ -25,7 +24,6 @@ export function Sidebar() {
   ];
   const conflictedFiles = status?.conflicted || [];
 
-  const hasStaged = stagedFiles.length > 0;
   const totalChanges =
     stagedFiles.length + unstagedFiles.length + conflictedFiles.length;
 
@@ -81,7 +79,7 @@ export function Sidebar() {
               />
             </div>
           </ScrollArea>
-          <SidebarCommitBox onCommit={createCommit} disabled={!hasStaged} />
+          <SidebarCommitBox />
         </>
       ) : (
         <BranchList />

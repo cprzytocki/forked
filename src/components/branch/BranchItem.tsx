@@ -12,24 +12,18 @@ import { BranchTrackingIndicators } from '@/components/branch/BranchTrackingIndi
 import { Button } from '@/components/common/Button';
 import type { BranchInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useRepoStore } from '@/stores/repoStore';
 
 interface BranchItemProps {
   branch: BranchInfo;
-  isViewing: boolean;
-  onSelect: () => void;
   onCheckout: () => void;
   onDelete: () => void;
-  onMerge: () => void;
 }
 
-export function BranchItem({
-  branch,
-  isViewing,
-  onSelect,
-  onCheckout,
-  onDelete,
-  onMerge,
-}: BranchItemProps) {
+export function BranchItem({ branch, onCheckout, onDelete }: BranchItemProps) {
+  const { viewingBranch, viewBranchCommits, mergeBranch } = useRepoStore();
+  const isViewing = viewingBranch === branch.name;
+
   return (
     <button
       type="button"
@@ -38,7 +32,13 @@ export function BranchItem({
         branch.is_head && 'bg-accent',
         isViewing && !branch.is_head && 'bg-accent/50',
       )}
-      onClick={onSelect}
+      onClick={() => {
+        if (branch.is_head) {
+          viewBranchCommits(null);
+        } else {
+          viewBranchCommits(branch.name);
+        }
+      }}
     >
       {branch.is_remote ? (
         <Cloud className="h-4 w-4 text-muted-foreground" />
@@ -46,7 +46,6 @@ export function BranchItem({
         <span
           className="text-muted-foreground"
           title="Branch is not tracking a remote branch yet"
-          aria-label="Branch is not tracking a remote branch yet"
         >
           <UploadCloud className="h-4 w-4" />
         </span>
@@ -82,7 +81,7 @@ export function BranchItem({
             className="h-6 w-6"
             onClick={(e) => {
               e.stopPropagation();
-              onMerge();
+              mergeBranch(branch.name);
             }}
             title="Merge into current branch"
             aria-label="Merge into current branch"
