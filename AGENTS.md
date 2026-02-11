@@ -210,3 +210,6 @@ pub struct RepoInfo {
 - **Watcher lifecycle**: Opening/initializing/cloning a repo should ensure watcher setup; closing should stop watcher
 - **Refresh after mutation**: Store actions that modify repo state must call `refreshStatus()` or `refreshAll()` afterward
 - **Package manager**: Use `pnpm`, not npm or yarn
+- **No lazy cleanup**: When changing behavior, remove superseded code in the same pass (unused params, imports, state, conditionals, dead branches, obsolete IPC fields). Do not leave transitional or redundant logic "for later."
+- **Cross-layer cleanup required**: If a contract changes (Rust command args, Tauri wrapper, store action, component call sites), update all layers in one change so signatures stay aligned.
+- **Verify cleanup before finishing**: Run targeted searches (`rg`) for removed symbols and run relevant checks (`pnpm tsc --noEmit`, `cargo check`) before handing off.

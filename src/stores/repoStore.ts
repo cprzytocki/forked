@@ -70,7 +70,7 @@ interface RepoState {
 
   // Remote actions
   fetch: (remote: string) => Promise<void>;
-  pull: (remote: string, branch: string, autoStash?: boolean) => Promise<void>;
+  pull: (remote: string, branch: string) => Promise<void>;
   push: (remote: string, branch: string) => Promise<void>;
 
   // Stash actions
@@ -391,10 +391,10 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     }
   },
 
-  pull: async (remote: string, branch: string, autoStash: boolean = false) => {
+  pull: async (remote: string, branch: string) => {
     set({ isLoading: true });
     try {
-      const result = await tauri.pullRemote(remote, branch, autoStash);
+      const result = await tauri.pullRemote(remote, branch);
       if (!result.success) {
         set({ error: result.message });
       }

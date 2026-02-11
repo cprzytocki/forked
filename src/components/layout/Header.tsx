@@ -9,9 +9,7 @@ import {
   Sun,
   Upload,
 } from 'lucide-react';
-import { useState } from 'react';
 import { Button } from '@/components/common/Button';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
 
@@ -19,7 +17,6 @@ export function Header() {
   const {
     repoInfo,
     currentBranch,
-    status,
     remotes,
     isLoading,
     closeRepository,
@@ -28,11 +25,6 @@ export function Header() {
     push,
   } = useRepoStore();
   const { theme, toggleTheme, openStashDialog } = useUiStore();
-  const [pullConfirmOpen, setPullConfirmOpen] = useState(false);
-  const [pendingPull, setPendingPull] = useState<{
-    remote: string;
-    branch: string;
-  } | null>(null);
 
   const defaultRemote = remotes[0]?.name || 'origin';
 
@@ -42,20 +34,7 @@ export function Header() {
 
   const handlePull = async () => {
     if (currentBranch) {
-      const hasLocalChanges =
-        !status ||
-        status.staged.length > 0 ||
-        status.unstaged.length > 0 ||
-        status.untracked.length > 0 ||
-        status.conflicted.length > 0;
-
-      if (hasLocalChanges) {
-        setPendingPull({ remote: defaultRemote, branch: currentBranch });
-        setPullConfirmOpen(true);
-        return;
-      }
-
-      await pull(defaultRemote, currentBranch, false);
+      await pull(defaultRemote, currentBranch);
     }
   };
 
@@ -154,29 +133,6 @@ export function Header() {
         </Button>
       </div>
 
-      <ConfirmDialog
-        open={pullConfirmOpen}
-        onOpenChange={(open) => {
-          setPullConfirmOpen(open);
-          if (!open) {
-            setPendingPull(null);
-          }
-        }}
-        title="Auto-stash before pull?"
-        description="You have uncommitted changes. Auto-stash, pull, then restore local changes?"
-        confirmLabel="Auto-stash and Pull"
-        onConfirm={() => {
-          if (pendingPull) {
-            pull(pendingPull.remote, pendingPull.branch, true);
-          }
-          setPullConfirmOpen(false);
-          setPendingPull(null);
-        }}
-        onCancel={() => {
-          setPullConfirmOpen(false);
-          setPendingPull(null);
-        }}
-      />
     </header>
   );
 }
