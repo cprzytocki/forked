@@ -60,6 +60,8 @@ export function MainPanel() {
   } | null>(null);
 
   const canReset = viewingBranch === null || viewingBranch === currentBranch;
+  const isViewingDifferentBranch =
+    viewingBranch !== null && viewingBranch !== currentBranch;
 
   const branch = useBranches().branches.find(
     (current) => current.name === currentBranch,
@@ -217,6 +219,12 @@ export function MainPanel() {
         <GitBranch className="h-4 w-4" />
         <span className="font-semibold text-sm">
           {currentBranch || 'No branch'}
+          {isViewingDifferentBranch ? (
+            <span className="font-normal text-muted-foreground">
+              {' '}
+              (viewing {viewingBranch})
+            </span>
+          ) : null}
         </span>
         <BranchTrackingIndicators
           ahead={branch?.ahead}
