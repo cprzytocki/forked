@@ -9,7 +9,6 @@ import {
   Sun,
   Upload,
 } from 'lucide-react';
-import { BranchTrackingIndicators } from '@/components/branch/BranchTrackingIndicators';
 import { Button } from '@/components/common/Button';
 import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -18,7 +17,6 @@ export function Header() {
   const {
     repoInfo,
     currentBranch,
-    branches,
     status,
     remotes,
     isLoading,
@@ -30,7 +28,6 @@ export function Header() {
   const { theme, toggleTheme, openStashDialog } = useUiStore();
 
   const defaultRemote = remotes[0]?.name || 'origin';
-  const activeBranch = branches.find((branch) => branch.name === currentBranch);
 
   const handleFetch = async () => {
     await fetch(defaultRemote);
@@ -111,10 +108,6 @@ export function Header() {
             >
               <Upload className="h-4 w-4" />
             </Button>
-            <BranchTrackingIndicators
-              ahead={activeBranch?.ahead}
-              behind={activeBranch?.behind}
-            />
           </div>
 
           <div className="flex items-center gap-1 ml-2">
