@@ -7,6 +7,7 @@ import {
   Star,
   Trash2,
 } from 'lucide-react';
+import { BranchTrackingIndicators } from '@/components/branch/BranchTrackingIndicators';
 import { Button } from '@/components/common/Button';
 import type { BranchInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -49,22 +50,7 @@ export function BranchItem({
           <Star className="inline h-3 w-3 ml-1 text-yellow-500 fill-yellow-500 align-middle" />
         )}
       </span>
-      {branch.ahead != null && branch.ahead > 0 && (
-        <span
-          className="font-mono text-xs shrink-0 text-git-added"
-          title={`${branch.ahead} commit${branch.ahead === 1 ? '' : 's'} ahead of upstream (to push)`}
-        >
-          ↑{branch.ahead}
-        </span>
-      )}
-      {branch.behind != null && branch.behind > 0 && (
-        <span
-          className="font-mono text-xs shrink-0 text-git-renamed"
-          title={`${branch.behind} commit${branch.behind === 1 ? '' : 's'} behind upstream (to pull)`}
-        >
-          ↓{branch.behind}
-        </span>
-      )}
+      <BranchTrackingIndicators ahead={branch.ahead} behind={branch.behind} />
       {branch.is_head && <Check className="h-4 w-4 text-green-500" />}
       {!branch.is_head && !branch.is_remote && (
         <div className="hidden group-hover:flex items-center gap-1">

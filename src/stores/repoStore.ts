@@ -165,7 +165,11 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   refreshCommits: async (limit = 50) => {
     try {
       const { viewingBranch } = get();
-      const commits = await tauri.getCommitHistoryWithGraph(limit, 0, viewingBranch);
+      const commits = await tauri.getCommitHistoryWithGraph(
+        limit,
+        0,
+        viewingBranch,
+      );
       set({ commits, hasMoreCommits: commits.length >= limit });
     } catch (_e) {
       // Empty repo might not have commits
@@ -174,14 +178,19 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   loadMoreCommits: async () => {
-    const { commits, hasMoreCommits, isLoadingMoreCommits, viewingBranch } = get();
+    const { commits, hasMoreCommits, isLoadingMoreCommits, viewingBranch } =
+      get();
     if (!hasMoreCommits || isLoadingMoreCommits) return;
 
     const pageSize = 50;
     const newLimit = commits.length + pageSize;
     set({ isLoadingMoreCommits: true });
     try {
-      const result = await tauri.getCommitHistoryWithGraph(newLimit, 0, viewingBranch);
+      const result = await tauri.getCommitHistoryWithGraph(
+        newLimit,
+        0,
+        viewingBranch,
+      );
       set({
         commits: result,
         hasMoreCommits: result.length >= newLimit,
@@ -278,7 +287,11 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   createCommit: async (message: string) => {
     try {
       await tauri.createCommit(message);
-      await Promise.all([get().refreshStatus(), get().refreshCommits()]);
+      await Promise.all([
+        get().refreshStatus(),
+        get().refreshCommits(),
+        get().refreshBranches(),
+      ]);
     } catch (e) {
       set({ error: String(e) });
     }
@@ -387,6 +400,7 @@ export const useRepoStore = create<RepoState>((set, get) => ({
     set({ isLoading: true });
     try {
       await tauri.pushRemote(remote, branch);
+      await get().refreshBranches();
     } catch (e) {
       set({ error: String(e) });
     } finally {

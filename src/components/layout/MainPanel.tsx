@@ -1,5 +1,6 @@
 import { GitBranch, GitCommit, Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { BranchTrackingIndicators } from '@/components/branch/BranchTrackingIndicators';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { ContextMenu } from '@/components/common/ContextMenu/ContextMenu';
@@ -217,22 +218,10 @@ export function MainPanel() {
         <span className="font-semibold text-sm">
           {currentBranch || 'No branch'}
         </span>
-        {branch?.ahead != null && branch.ahead > 0 && (
-          <span
-            className="font-mono text-xs shrink-0 text-git-added"
-            title={`${branch.ahead} commit${branch.ahead === 1 ? '' : 's'} ahead of upstream (to push)`}
-          >
-            ↑{branch.ahead}
-          </span>
-        )}
-        {branch?.behind != null && branch.behind > 0 && (
-          <span
-            className="font-mono text-xs shrink-0 text-git-renamed"
-            title={`${branch.behind} commit${branch.behind === 1 ? '' : 's'} behind upstream (to pull)`}
-          >
-            ↓{branch.behind}
-          </span>
-        )}
+        <BranchTrackingIndicators
+          ahead={branch?.ahead}
+          behind={branch?.behind}
+        />
         <span className="text-xs text-muted-foreground ml-auto">
           {commits.length}
           {hasMoreCommits ? '+' : ''} commits
