@@ -1,5 +1,26 @@
 {
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -q 'src-tauri.*\\.rs'; then cd /Users/chrisprzytocki/workspace/forked/src-tauri && cargo check 2>&1 | tail -20; fi",
+            "timeout": 60,
+            "statusMessage": "Running cargo check..."
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'src/.*\\.(ts|tsx)'; then cd /Users/chrisprzytocki/workspace/forked && npx tsc --noEmit 2>&1 | tail -20; fi",
+            "timeout": 30,
+            "statusMessage": "Running tsc --noEmit..."
+          }
+        ]
+      }
+    ]
   }
 }

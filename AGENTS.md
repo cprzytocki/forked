@@ -64,13 +64,15 @@ Every git operation follows this chain:
 1. React component -> Zustand store action (`src/stores/`)
 2. Store action -> typed wrapper in `src/lib/tauri.ts` (calls `invoke()`)
 3. Tauri routes to `#[tauri::command]` in `src-tauri/src/commands/`
-4. Command acquires `AppState.repository` mutex lock, calls `src-tauri/src/git/`
+4. Command acquires `state.repo` mutex lock (for commands that need an open repo), calls `src-tauri/src/git/`
 5. Result serializes back as JSON
+
+Repository lifecycle commands (`open_repository`, `init_repository`, `clone_repository`) also start a Rust file watcher (`src-tauri/src/watcher.rs`) that emits `repo-changed`. The frontend listens in `src/App.tsx` and triggers `refreshAll()`.
 
 ### Adding a New Feature (Checklist)
 
 1. Add git logic in `src-tauri/src/git/` (pure `git2` operations)
-2. Add command handler in `src-tauri/src/commands/` (acquires mutex, calls git module)
+2. Add command handler in `src-tauri/src/commands/` (for repo-dependent commands: acquires mutex and checks open repo; otherwise use `AppState` helpers as needed)
 3. Register command in `src-tauri/src/lib.rs` `invoke_handler`
 4. Add TypeScript wrapper in `src/lib/tauri.ts`
 5. Add/update types in `src/lib/types.ts` (must match Rust serde structs)
@@ -153,15 +155,20 @@ pub struct RepoInfo {
 ```
 
 **Command handler pattern** - every command must:
-1. Accept `state: State<'_, AppState>` parameter
-2. Return `Result<T, GitClientError>`
-3. Lock the mutex: `let guard = state.repo.lock();`
-4. Check for open repo: `let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;`
-5. Use `?` for error propagation
+1. Return `Result<T, GitClientError>`
+2. Use `?` for error propagation
+3. For commands that require an open repo:
+   - Accept `state: State<'_, AppState>`
+   - Lock the mutex: `let guard = state.repo.lock();`
+   - Check for open repo: `let repo = guard.repository.as_ref().ok_or(GitClientError::NoRepository)?;`
+4. For repository lifecycle commands (`open/init/clone/close/get_current_repo_path`), use `AppState` helpers (`set_repository`, `clear_repository`, `get_repo_path`) and watcher management as needed
 
 **Error type:** `GitClientError` in `src-tauri/src/error.rs` (thiserror enum). Use existing variants:
 - `Git(git2::Error)` - auto-converted via `#[from]`
 - `NoRepository` - when no repo is open
+- `RepoNotFound(String)` - repository path does not exist
+- `InvalidPath(String)` - path validation errors
+- `Lock(String)` - synchronization/lock failures
 - `Operation(String)` - for custom error messages
 - `Io(std::io::Error)` - auto-converted via `#[from]`
 
@@ -179,6 +186,7 @@ pub struct RepoInfo {
 | Tauri command registration | `src-tauri/src/lib.rs` |
 | Error enum | `src-tauri/src/error.rs` |
 | App state (mutex) | `src-tauri/src/state.rs` |
+| File watcher | `src-tauri/src/watcher.rs` |
 | Command handlers | `src-tauri/src/commands/*.rs` |
 | Git operations | `src-tauri/src/git/*.rs` |
 | TypeScript IPC wrappers | `src/lib/tauri.ts` |
@@ -196,5 +204,6 @@ pub struct RepoInfo {
 - **Type sync**: TypeScript interfaces in `src/lib/types.ts` must exactly match Rust serde structs (including `snake_case` field names)
 - **Command registration**: Every new `#[tauri::command]` must be added to the `invoke_handler` array in `lib.rs`
 - **Mutex discipline**: Always acquire via `state.repo.lock()`, never hold across `.await` points
+- **Watcher lifecycle**: Opening/initializing/cloning a repo should ensure watcher setup; closing should stop watcher
 - **Refresh after mutation**: Store actions that modify repo state must call `refreshStatus()` or `refreshAll()` afterward
 - **Package manager**: Use `pnpm`, not npm or yarn
