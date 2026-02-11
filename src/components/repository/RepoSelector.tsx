@@ -8,7 +8,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/common/Button';
-import { ScrollArea } from '@/components/common/ScrollArea';
+import { ScrollArea } from '@/components/common/ScrollArea/ScrollArea';
 import { useRepoStore } from '@/stores/repoStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUiStore } from '@/stores/uiStore';

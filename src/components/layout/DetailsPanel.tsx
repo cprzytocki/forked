@@ -1,5 +1,5 @@
 import { FileText, GitCommit, Loader2 } from 'lucide-react';
-import { ScrollArea } from '@/components/common/ScrollArea';
+import { ScrollArea } from '@/components/common/ScrollArea/ScrollArea';
 import { DiffViewer } from '@/components/diff/DiffViewer';
 import { DiffViewToggle } from '@/components/diff/DiffViewToggle';
 import { SplitDiffViewer } from '@/components/diff/SplitDiffViewer';

@@ -17,6 +17,7 @@ export function Header() {
   const {
     repoInfo,
     currentBranch,
+    status,
     remotes,
     isLoading,
     closeRepository,
@@ -34,7 +35,26 @@ export function Header() {
 
   const handlePull = async () => {
     if (currentBranch) {
-      await pull(defaultRemote, currentBranch);
+      const hasLocalChanges = Boolean(
+        status &&
+          (status.staged.length > 0 ||
+            status.unstaged.length > 0 ||
+            status.untracked.length > 0 ||
+            status.conflicted.length > 0),
+      );
+
+      if (hasLocalChanges) {
+        const shouldAutoStash = window.confirm(
+          'You have uncommitted changes. Auto-stash, pull, then restore changes?',
+        );
+        if (!shouldAutoStash) {
+          return;
+        }
+        await pull(defaultRemote, currentBranch, true);
+        return;
+      }
+
+      await pull(defaultRemote, currentBranch, false);
     }
   };
 

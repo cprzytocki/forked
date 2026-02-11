@@ -96,6 +96,7 @@ import { useRepoStore } from '@/stores/repoStore';
 - Use `@/*` path alias for all cross-directory imports (`@/` maps to `./src/`)
 - Use relative imports (`./`) only within the same directory (e.g., inside `src/lib/`)
 - Use `import type { ... }` for type-only imports
+- Do **not** use barrel imports/exports (`index.ts`) for components; import directly from the concrete file path
 - Use `import * as tauri from '@/lib/tauri'` in stores (namespace import)
 - Use `import * as DialogPrimitive from '@radix-ui/react-dialog'` for Radix primitives
 
@@ -110,6 +111,8 @@ import { useRepoStore } from '@/stores/repoStore';
 **Components:**
 - Feature components: plain `export function ComponentName()` declarations
 - Common UI components (shadcn/ui): use `React.forwardRef` with `displayName`
+- Keep one component per `.tsx` file. If a file defines parent + child/nested child components, split children into their own files.
+- When helpful, group related parent/child components in a folder named after the parent component.
 - Use `cn()` from `@/lib/utils` for conditional class merging (clsx + tailwind-merge)
 - Use `cva` from `class-variance-authority` for component variants
 

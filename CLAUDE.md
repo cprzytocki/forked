@@ -57,6 +57,13 @@ The app uses Tauri's IPC invoke system. The full flow for any git operation is:
 
 TypeScript and Vite are configured with `@/*` → `./src/*` path alias.
 
+## Frontend Component Rules
+
+- Use one component per `.tsx` file.
+- If a file has a parent component plus child/nested child components, split each child into its own file.
+- If it improves organization, group related parent/child files in a folder named for the parent component.
+- Do not use barrel imports/exports (`index.ts`) for components; always import from the concrete component file path.
+
 ### Theming
 
 Dark/light mode via Tailwind's `class` strategy. CSS variables defined in `src/styles/globals.css`. Git-specific colors (added/removed/modified/renamed/untracked) available as `text-git-*` / `bg-git-*` classes.

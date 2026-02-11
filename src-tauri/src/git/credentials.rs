@@ -182,7 +182,8 @@ pub fn pull_remote(
         let refname = format!("refs/heads/{}", branch_name);
         let mut reference = repo.find_reference(&refname)?;
         reference.set_target(fetch_commit.id(), "Fast-forward pull")?;
-        repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))?;
+        let mut checkout_opts = git2::build::CheckoutBuilder::default();
+        repo.checkout_head(Some(&mut checkout_opts))?;
 
         return Ok(PullResult {
             success: true,
@@ -246,6 +247,14 @@ pub fn pull_remote(
         conflicts: Vec::new(),
         message: "Pull completed with merge".to_string(),
     })
+}
+
+pub fn is_worktree_dirty(repo: &git2::Repository) -> Result<bool, git2::Error> {
+    let mut status_opts = git2::StatusOptions::new();
+    status_opts.include_untracked(true).recurse_untracked_dirs(true);
+    let statuses = repo.statuses(Some(&mut status_opts))?;
+
+    Ok(statuses.iter().any(|entry| !entry.status().is_empty()))
 }
 
 use serde::Serialize;

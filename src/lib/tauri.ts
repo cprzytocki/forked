@@ -136,8 +136,9 @@ export async function fetchRemote(remote: string): Promise<void> {
 export async function pullRemote(
   remote: string,
   branch: string,
+  autoStash: boolean = false,
 ): Promise<PullResult> {
-  return invoke('pull', { remote, branch });
+  return invoke('pull', { remote, branch, autoStash });
 }
 
 export async function pushRemote(

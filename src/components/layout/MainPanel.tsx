@@ -1,89 +1,21 @@
 import { GitBranch, GitCommit, Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useBranches } from '@/hooks/useBranches';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import {
-  ContextMenu,
-  ContextMenuItem,
-} from '@/components/common/ContextMenu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/common/Dialog';
-import { ScrollArea } from '@/components/common/ScrollArea';
-import { CommitGraph } from '@/components/history/CommitGraph';
-import type { CommitGraphEntry, CommitInfo } from '@/lib/types';
-import { cn, formatRelativeTime, getBranchColorHsl } from '@/lib/utils';
+import { ContextMenu } from '@/components/common/ContextMenu/ContextMenu';
+import { ContextMenuItem } from '@/components/common/ContextMenu/ContextMenuItem';
+import { Dialog } from '@/components/common/Dialog/Dialog';
+import { DialogContent } from '@/components/common/Dialog/DialogContent';
+import { DialogDescription } from '@/components/common/Dialog/DialogDescription';
+import { DialogFooter } from '@/components/common/Dialog/DialogFooter';
+import { DialogHeader } from '@/components/common/Dialog/DialogHeader';
+import { DialogTitle } from '@/components/common/Dialog/DialogTitle';
+import { ScrollArea } from '@/components/common/ScrollArea/ScrollArea';
+import { CommitItem } from '@/components/layout/CommitItem';
+import { useBranches } from '@/hooks/useBranches';
+import type { CommitInfo } from '@/lib/types';
 import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
-
-interface CommitItemProps {
-  entry: CommitGraphEntry;
-  isSelected: boolean;
-  onSelect: (e: React.MouseEvent) => void;
-  onContextMenu?: (e: React.MouseEvent) => void;
-  maxLanes: number;
-}
-
-function CommitItem({
-  entry,
-  isSelected,
-  onSelect,
-  onContextMenu,
-  maxLanes,
-}: CommitItemProps) {
-  const { commit, graph } = entry;
-
-  return (
-    <button
-      type="button"
-      className={cn(
-        'pl-1 flex items-center cursor-pointer transition-colors w-full text-left',
-        'hover:bg-accent/50',
-        isSelected && 'bg-accent',
-      )}
-      onClick={onSelect}
-      onContextMenu={onContextMenu}
-    >
-      <div className="flex-shrink-0">
-        <CommitGraph node={graph} maxLanes={maxLanes} />
-      </div>
-
-      <div className="flex-1 min-w-0 px-2 py-1.5 flex items-center gap-2">
-        {graph.branch_names.map((name) => (
-          <span
-            key={name}
-            className="branch-badge"
-            style={{
-              backgroundColor: `${getBranchColorHsl(graph.color_index)}`,
-              color: 'white',
-            }}
-          >
-            {name}
-          </span>
-        ))}
-        <span className="text-[13px] font-medium truncate">{commit.summary}</span>
-      </div>
-
-      <div className="flex-shrink-0 w-[120px] px-2 text-xs text-muted-foreground truncate">
-        {commit.author_name}
-      </div>
-
-      <div className="flex-shrink-0 w-[70px] px-2 font-mono text-[11px] text-muted-foreground">
-        {commit.short_id}
-      </div>
-
-      <div className="flex-shrink-0 w-[100px] px-2 pr-3 text-xs text-muted-foreground text-right">
-        {formatRelativeTime(commit.time)}
-      </div>
-    </button>
-  );
-}
 
 export function MainPanel() {
   const {
@@ -129,12 +61,14 @@ export function MainPanel() {
   const canReset = viewingBranch === null || viewingBranch === currentBranch;
 
   const branch = useBranches().branches.find(
-    (branch) => branch.name === currentBranch,
+    (current) => current.name === currentBranch,
   );
 
   const commitIndexById = useMemo(() => {
     const map = new Map<string, number>();
-    commits.forEach((entry, index) => map.set(entry.commit.id, index));
+    commits.forEach((entry, index) => {
+      map.set(entry.commit.id, index);
+    });
     return map;
   }, [commits]);
 
@@ -145,7 +79,10 @@ export function MainPanel() {
         if (index === undefined) return null;
         return { id, index, commit: commits[index].commit };
       })
-      .filter((item): item is { id: string; index: number; commit: CommitInfo } => item !== null)
+      .filter(
+        (item): item is { id: string; index: number; commit: CommitInfo } =>
+          item !== null,
+      )
       .sort((a, b) => a.index - b.index);
   }, [selectedCommitIds, commitIndexById, commits]);
 
@@ -165,13 +102,13 @@ export function MainPanel() {
   const maxLanes = useMemo(() => {
     if (commits.length === 0) return 0;
     let max = 0;
-    for (const e of commits) {
-      max = Math.max(max, e.graph.lane);
-      for (const conn of e.graph.connections_to_parents) {
-        max = Math.max(max, conn.to_lane);
+    for (const entry of commits) {
+      max = Math.max(max, entry.graph.lane);
+      for (const connection of entry.graph.connections_to_parents) {
+        max = Math.max(max, connection.to_lane);
       }
-      for (const pt of e.graph.pass_through_lanes) {
-        max = Math.max(max, pt.lane);
+      for (const passThrough of entry.graph.pass_through_lanes) {
+        max = Math.max(max, passThrough.lane);
       }
     }
     return max + 1;
@@ -193,7 +130,9 @@ export function MainPanel() {
       if (anchorIndex !== undefined) {
         const start = Math.min(anchorIndex, clickedIndex);
         const end = Math.max(anchorIndex, clickedIndex);
-        const rangeIds = commits.slice(start, end + 1).map((entry) => entry.commit.id);
+        const rangeIds = commits
+          .slice(start, end + 1)
+          .map((entry) => entry.commit.id);
         setSelectedCommitIds(new Set(rangeIds));
         selectCommit(commit);
         loadCommitDiff(commit.id);
@@ -224,7 +163,9 @@ export function MainPanel() {
     const validIds = new Set(commits.map((entry) => entry.commit.id));
 
     setSelectedCommitIds((previous) => {
-      const next = new Set(Array.from(previous).filter((id) => validIds.has(id)));
+      const next = new Set(
+        Array.from(previous).filter((id) => validIds.has(id)),
+      );
       if (next.size > 0) return next;
       if (selectedCommit && validIds.has(selectedCommit.id)) {
         return new Set([selectedCommit.id]);
@@ -234,7 +175,8 @@ export function MainPanel() {
 
     setSelectionAnchorId((previous) => {
       if (previous && validIds.has(previous)) return previous;
-      if (selectedCommit && validIds.has(selectedCommit.id)) return selectedCommit.id;
+      if (selectedCommit && validIds.has(selectedCommit.id))
+        return selectedCommit.id;
       return null;
     });
   }, [commits, selectedCommit]);
@@ -272,7 +214,9 @@ export function MainPanel() {
     <div className="flex flex-col h-full">
       <div className="p-2 border-b flex items-center gap-2">
         <GitBranch className="h-4 w-4" />
-        <span className="font-semibold text-sm">{currentBranch || 'No branch'}</span>
+        <span className="font-semibold text-sm">
+          {currentBranch || 'No branch'}
+        </span>
         {branch?.ahead != null && branch.ahead > 0 && (
           <span
             className="font-mono text-xs shrink-0 text-git-added"
@@ -418,7 +362,8 @@ export function MainPanel() {
           resetConfirm?.mode === 'hard' ? (
             <>
               Are you sure you want to{' '}
-              <span className="font-semibold text-destructive">hard reset</span> to{' '}
+              <span className="font-semibold text-destructive">hard reset</span>{' '}
+              to{' '}
               <span className="font-semibold text-foreground">
                 {resetConfirm?.commitSummary}
               </span>
@@ -434,8 +379,12 @@ export function MainPanel() {
             </>
           )
         }
-        confirmLabel={resetConfirm?.mode === 'hard' ? 'Hard Reset' : 'Soft Reset'}
-        confirmVariant={resetConfirm?.mode === 'hard' ? 'destructive' : 'default'}
+        confirmLabel={
+          resetConfirm?.mode === 'hard' ? 'Hard Reset' : 'Soft Reset'
+        }
+        confirmVariant={
+          resetConfirm?.mode === 'hard' ? 'destructive' : 'default'
+        }
         onConfirm={() => {
           if (resetConfirm) {
             resetToCommit(resetConfirm.commitId, resetConfirm.mode);
@@ -464,10 +413,7 @@ export function MainPanel() {
             <div className="max-h-32 overflow-auto rounded-md border bg-muted/20 p-2">
               <ul className="space-y-1.5">
                 {squashConfirm?.commits.map((commit) => (
-                  <li
-                    key={commit.id}
-                    className="text-xs text-muted-foreground"
-                  >
+                  <li key={commit.id} className="text-xs text-muted-foreground">
                     <span className="font-mono mr-2">{commit.short_id}</span>
                     <span className="text-foreground">{commit.summary}</span>
                   </li>

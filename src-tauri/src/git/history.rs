@@ -17,6 +17,7 @@ pub struct CommitInfo {
     pub committer_email: String,
     pub time: i64,
     pub parent_ids: Vec<String>,
+    pub tag_names: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -234,9 +235,37 @@ pub struct CommitStats {
     pub deletions: usize,
 }
 
-fn commit_to_info(commit: &git2::Commit) -> CommitInfo {
+fn collect_tags_by_commit(repo: &Repository) -> HashMap<String, Vec<String>> {
+    let mut tags_by_commit: HashMap<String, Vec<String>> = HashMap::new();
+
+    if let Ok(tag_names) = repo.tag_names(None) {
+        for name in tag_names.iter().flatten() {
+            let tag_ref = format!("refs/tags/{}", name);
+            let Ok(object) = repo.revparse_single(&tag_ref) else {
+                continue;
+            };
+            let Ok(commit) = object.peel_to_commit() else {
+                continue;
+            };
+
+            tags_by_commit
+                .entry(commit.id().to_string())
+                .or_default()
+                .push(name.to_string());
+        }
+    }
+
+    for names in tags_by_commit.values_mut() {
+        names.sort();
+    }
+
+    tags_by_commit
+}
+
+fn commit_to_info(commit: &git2::Commit, tags_by_commit: &HashMap<String, Vec<String>>) -> CommitInfo {
     let id = commit.id().to_string();
     let short_id = id.chars().take(7).collect();
+    let tag_names = tags_by_commit.get(&id).cloned().unwrap_or_default();
 
     CommitInfo {
         id,
@@ -249,6 +278,7 @@ fn commit_to_info(commit: &git2::Commit) -> CommitInfo {
         committer_email: commit.committer().email().unwrap_or("").to_string(),
         time: commit.time().seconds(),
         parent_ids: commit.parent_ids().map(|id| id.to_string()).collect(),
+        tag_names,
     }
 }
 
@@ -258,6 +288,7 @@ pub fn get_commit_history(
     skip: usize,
     branch_name: Option<&str>,
 ) -> Result<Vec<CommitInfo>, GitClientError> {
+    let tags_by_commit = collect_tags_by_commit(repo);
     let mut revwalk = repo.revwalk()?;
     match branch_name {
         Some(name) => {
@@ -282,7 +313,7 @@ pub fn get_commit_history(
         .take(limit)
         .filter_map(|oid| oid.ok())
         .filter_map(|oid| repo.find_commit(oid).ok())
-        .map(|commit| commit_to_info(&commit))
+        .map(|commit| commit_to_info(&commit, &tags_by_commit))
         .collect();
 
     Ok(commits)
@@ -294,7 +325,8 @@ pub fn get_commit_details(
 ) -> Result<CommitDetails, GitClientError> {
     let oid = Oid::from_str(oid_str).map_err(|e| GitClientError::Operation(e.to_string()))?;
     let commit = repo.find_commit(oid)?;
-    let commit_info = commit_to_info(&commit);
+    let tags_by_commit = collect_tags_by_commit(repo);
+    let commit_info = commit_to_info(&commit, &tags_by_commit);
 
     let tree = commit.tree()?;
     let parent_tree = if commit.parent_count() > 0 {
@@ -419,7 +451,8 @@ pub fn create_commit(repo: &Repository, message: &str) -> Result<CommitInfo, Git
     )?;
 
     let commit = repo.find_commit(oid)?;
-    Ok(commit_to_info(&commit))
+    let tags_by_commit = collect_tags_by_commit(repo);
+    Ok(commit_to_info(&commit, &tags_by_commit))
 }
 
 pub fn squash_commits(

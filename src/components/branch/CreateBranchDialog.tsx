@@ -1,19 +1,18 @@
+import { ChevronDown } from 'lucide-react';
 import type React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { BranchOption } from '@/components/branch/BranchOption';
 import { Button } from '@/components/common/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/common/Dialog';
+import { Dialog } from '@/components/common/Dialog/Dialog';
+import { DialogContent } from '@/components/common/Dialog/DialogContent';
+import { DialogDescription } from '@/components/common/Dialog/DialogDescription';
+import { DialogFooter } from '@/components/common/Dialog/DialogFooter';
+import { DialogHeader } from '@/components/common/Dialog/DialogHeader';
+import { DialogTitle } from '@/components/common/Dialog/DialogTitle';
 import { Input } from '@/components/common/Input';
+import { cn } from '@/lib/utils';
 import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
-import { ChevronDown, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export function CreateBranchDialog() {
   const { createBranch, branches, currentBranch } = useRepoStore();
@@ -28,7 +27,10 @@ export function CreateBranchDialog() {
   useEffect(() => {
     if (!selectorOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) {
+      if (
+        selectorRef.current &&
+        !selectorRef.current.contains(e.target as Node)
+      ) {
         setSelectorOpen(false);
         setSearch('');
       }
@@ -68,26 +70,6 @@ export function CreateBranchDialog() {
   );
   const filteredRemote = remoteBranches.filter((b) =>
     b.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const BranchOption = ({ name: branchName, selected, onSelect }: { name: string; selected: boolean; onSelect: () => void }) => (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={cn(
-        'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer',
-        'hover:bg-accent hover:text-accent-foreground',
-        selected && 'bg-accent',
-      )}
-    >
-      <Check
-        className={cn(
-          'h-4 w-4 shrink-0',
-          selected ? 'opacity-100' : 'opacity-0',
-        )}
-      />
-      <span className="truncate">{branchName}</span>
-    </button>
   );
 
   return (
@@ -152,7 +134,8 @@ export function CreateBranchDialog() {
                       />
                     </div>
                     <div className="max-h-48 overflow-y-auto p-1">
-                      {filteredLocal.length === 0 && filteredRemote.length === 0 ? (
+                      {filteredLocal.length === 0 &&
+                      filteredRemote.length === 0 ? (
                         <div className="px-2 py-1.5 text-sm text-muted-foreground">
                           No branches found
                         </div>

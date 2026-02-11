@@ -1,14 +1,12 @@
 import type React from 'react';
 import { useCallback, useEffect } from 'react';
 import { Button } from '@/components/common/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/common/Dialog';
+import { Dialog } from '@/components/common/Dialog/Dialog';
+import { DialogContent } from '@/components/common/Dialog/DialogContent';
+import { DialogDescription } from '@/components/common/Dialog/DialogDescription';
+import { DialogFooter } from '@/components/common/Dialog/DialogFooter';
+import { DialogHeader } from '@/components/common/Dialog/DialogHeader';
+import { DialogTitle } from '@/components/common/Dialog/DialogTitle';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -16,7 +14,13 @@ interface ConfirmDialogProps {
   title: string;
   description: React.ReactNode;
   confirmLabel: string;
-  confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  confirmVariant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link';
   onConfirm: () => void;
   onCancel: () => void;
 }

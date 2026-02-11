@@ -1,16 +1,14 @@
 import { Archive, Copy, Play, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/common/Dialog';
+import { Dialog } from '@/components/common/Dialog/Dialog';
+import { DialogContent } from '@/components/common/Dialog/DialogContent';
+import { DialogDescription } from '@/components/common/Dialog/DialogDescription';
+import { DialogFooter } from '@/components/common/Dialog/DialogFooter';
+import { DialogHeader } from '@/components/common/Dialog/DialogHeader';
+import { DialogTitle } from '@/components/common/Dialog/DialogTitle';
 import { Input } from '@/components/common/Input';
-import { ScrollArea } from '@/components/common/ScrollArea';
+import { ScrollArea } from '@/components/common/ScrollArea/ScrollArea';
 import { useRepoStore } from '@/stores/repoStore';
 import { useUiStore } from '@/stores/uiStore';
 

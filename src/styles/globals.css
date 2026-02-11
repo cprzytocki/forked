@@ -161,3 +161,7 @@
 .branch-badge {
   @apply inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium leading-none whitespace-nowrap;
 }
+
+.tag-badge {
+  @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium leading-none whitespace-nowrap bg-secondary text-secondary-foreground;
+}

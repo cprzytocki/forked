@@ -37,6 +37,7 @@ export interface CommitInfo {
   committer_email: string;
   time: number;
   parent_ids: string[];
+  tag_names: string[];
 }
 
 export interface FileChange {
