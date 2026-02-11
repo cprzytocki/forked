@@ -33,6 +33,7 @@ pub fn run() {
             commands::get_commit_history_with_graph,
             commands::get_commit_details,
             commands::reset_to_commit,
+            commands::squash_commits,
             // Branch commands
             commands::list_branches,
             commands::create_branch,

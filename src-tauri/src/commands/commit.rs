@@ -132,3 +132,16 @@ pub fn reset_to_commit(
         .ok_or(GitClientError::NoRepository)?;
     git::reset_to_commit(repo, &commit_id, &mode)
 }
+
+#[tauri::command]
+pub fn squash_commits(
+    commit_ids: Vec<String>,
+    state: State<AppState>,
+) -> Result<(), GitClientError> {
+    let guard = state.repo.lock();
+    let repo = guard
+        .repository
+        .as_ref()
+        .ok_or(GitClientError::NoRepository)?;
+    git::squash_commits(repo, &commit_ids)
+}

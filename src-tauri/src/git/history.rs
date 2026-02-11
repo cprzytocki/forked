@@ -1,8 +1,9 @@
 use crate::error::GitClientError;
-use git2::{Oid, Repository, Sort};
+use git2::build::CheckoutBuilder;
+use git2::{Oid, Repository, Sort, StatusOptions};
 use serde::Serialize;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Serialize, Clone)]
 pub struct CommitInfo {
@@ -419,4 +420,194 @@ pub fn create_commit(repo: &Repository, message: &str) -> Result<CommitInfo, Git
 
     let commit = repo.find_commit(oid)?;
     Ok(commit_to_info(&commit))
+}
+
+pub fn squash_commits(repo: &Repository, commit_ids: &[String]) -> Result<(), GitClientError> {
+    if commit_ids.len() < 2 {
+        return Err(GitClientError::Operation(
+            "Select at least two commits to squash".to_string(),
+        ));
+    }
+
+    let mut status_options = StatusOptions::new();
+    status_options
+        .include_untracked(true)
+        .recurse_untracked_dirs(true);
+    let statuses = repo.statuses(Some(&mut status_options))?;
+    if !statuses.is_empty() {
+        return Err(GitClientError::Operation(
+            "Cannot squash commits with uncommitted changes".to_string(),
+        ));
+    }
+
+    let head = repo.head()?;
+    if !head.is_branch() {
+        return Err(GitClientError::Operation(
+            "Cannot squash commits in detached HEAD state".to_string(),
+        ));
+    }
+    let head_name = head
+        .name()
+        .ok_or_else(|| GitClientError::Operation("Invalid HEAD reference".to_string()))?
+        .to_string();
+    let head_oid = head
+        .target()
+        .ok_or_else(|| GitClientError::Operation("HEAD has no target commit".to_string()))?;
+
+    let mut selected_oids = Vec::with_capacity(commit_ids.len());
+    let mut selected_set = HashSet::with_capacity(commit_ids.len());
+    for id in commit_ids {
+        let oid = Oid::from_str(id)
+            .map_err(|e| GitClientError::Operation(format!("Invalid commit ID '{}': {}", id, e)))?;
+        if !selected_set.insert(oid) {
+            return Err(GitClientError::Operation(
+                "Duplicate commits in selection".to_string(),
+            ));
+        }
+        selected_oids.push(oid);
+    }
+    if selected_set.contains(&head_oid) {
+        return Err(GitClientError::Operation(
+            "Cannot squash a selection that includes HEAD".to_string(),
+        ));
+    }
+
+    let mut first_parent_chain: Vec<Oid> = Vec::new();
+    let mut cursor = Some(head_oid);
+    while let Some(oid) = cursor {
+        first_parent_chain.push(oid);
+        let commit = repo.find_commit(oid)?;
+        cursor = if commit.parent_count() > 0 {
+            Some(commit.parent_id(0)?)
+        } else {
+            None
+        };
+    }
+
+    let mut index_by_oid: HashMap<Oid, usize> = HashMap::with_capacity(first_parent_chain.len());
+    for (idx, oid) in first_parent_chain.iter().copied().enumerate() {
+        index_by_oid.insert(oid, idx);
+    }
+
+    let mut selected_indices: Vec<usize> = selected_oids
+        .iter()
+        .map(|oid| {
+            index_by_oid.get(oid).copied().ok_or_else(|| {
+                GitClientError::Operation(
+                    "Selected commits must be on the current branch first-parent history"
+                        .to_string(),
+                )
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    selected_indices.sort_unstable();
+
+    for pair in selected_indices.windows(2) {
+        if pair[1] != pair[0] + 1 {
+            return Err(GitClientError::Operation(
+                "Selected commits must be consecutive".to_string(),
+            ));
+        }
+    }
+
+    let newest_selected_index = selected_indices[0];
+    let oldest_selected_index = *selected_indices
+        .last()
+        .ok_or_else(|| GitClientError::Operation("No commits selected".to_string()))?;
+
+    for &oid in &first_parent_chain[0..=oldest_selected_index] {
+        let commit = repo.find_commit(oid)?;
+        if commit.parent_count() > 1 {
+            return Err(GitClientError::Operation(
+                "Cannot squash commits when merge commits exist between selection and HEAD"
+                    .to_string(),
+            ));
+        }
+    }
+
+    let oldest_selected = repo.find_commit(first_parent_chain[oldest_selected_index])?;
+    let base_parent = if oldest_selected.parent_count() > 0 {
+        Some(repo.find_commit(oldest_selected.parent_id(0)?)?)
+    } else {
+        None
+    };
+
+    let replay_oids: Vec<Oid> = first_parent_chain[0..=oldest_selected_index]
+        .iter()
+        .rev()
+        .copied()
+        .collect();
+
+    let newest_selected_oid = first_parent_chain[newest_selected_index];
+    let selected_old_to_new: Vec<Oid> = first_parent_chain
+        [newest_selected_index..=oldest_selected_index]
+        .iter()
+        .rev()
+        .copied()
+        .collect();
+
+    let mut message_parts = Vec::new();
+    for oid in selected_old_to_new {
+        let commit = repo.find_commit(oid)?;
+        let message = commit.message().unwrap_or("").trim();
+        if !message.is_empty() {
+            message_parts.push(message.to_string());
+        }
+    }
+    let squash_message = if message_parts.is_empty() {
+        "Squashed commit".to_string()
+    } else {
+        message_parts.join("\n\n")
+    };
+    let squash_tree = repo.find_commit(newest_selected_oid)?.tree()?;
+    let signature = repo.signature()?;
+
+    let mut current_parent = base_parent;
+    let mut new_head_oid = None;
+
+    for oid in replay_oids {
+        if selected_set.contains(&oid) {
+            if oid == newest_selected_oid {
+                let parent_refs: Vec<&git2::Commit> = current_parent.iter().collect();
+                let squashed_oid = repo.commit(
+                    None,
+                    &signature,
+                    &signature,
+                    &squash_message,
+                    &squash_tree,
+                    &parent_refs,
+                )?;
+                current_parent = Some(repo.find_commit(squashed_oid)?);
+                new_head_oid = Some(squashed_oid);
+            }
+            continue;
+        }
+
+        let original = repo.find_commit(oid)?;
+        let tree = original.tree()?;
+        let author = original.author();
+        let committer = original.committer();
+        let parent_refs: Vec<&git2::Commit> = current_parent.iter().collect();
+        let rewritten_oid = repo.commit(
+            None,
+            &author,
+            &committer,
+            original.message().unwrap_or(""),
+            &tree,
+            &parent_refs,
+        )?;
+        current_parent = Some(repo.find_commit(rewritten_oid)?);
+        new_head_oid = Some(rewritten_oid);
+    }
+
+    let rewritten_head = new_head_oid.ok_or_else(|| {
+        GitClientError::Operation("Failed to rewrite commits for squash".to_string())
+    })?;
+
+    let mut branch_ref = repo.find_reference(&head_name)?;
+    branch_ref.set_target(rewritten_head, "squash commits")?;
+    repo.set_head(&head_name)?;
+    repo.checkout_head(Some(CheckoutBuilder::new().force()))?;
+
+    Ok(())
 }
