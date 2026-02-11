@@ -65,21 +65,19 @@ export function SidebarFileItem({
           </Button>
         ) : (
           <>
-            {!file.is_new && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDiscard?.();
-                }}
-                title="Discard changes"
-                aria-label="Discard changes"
-              >
-                <RotateCcw className="h-3 w-3" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDiscard?.();
+              }}
+              title="Discard changes"
+              aria-label="Discard changes"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
