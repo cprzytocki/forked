@@ -152,6 +152,13 @@ pub fn push_remote(
     let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
 
     remote.push(&[&refspec], Some(&mut get_push_options()))?;
+
+    let mut local_branch = repo.find_branch(branch_name, git2::BranchType::Local)?;
+    if local_branch.upstream().is_err() {
+        let upstream_name = format!("{}/{}", remote_name, branch_name);
+        local_branch.set_upstream(Some(&upstream_name))?;
+    }
+
     Ok(())
 }
 
