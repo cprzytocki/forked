@@ -121,7 +121,6 @@ export function MainPanel() {
   const branch = useBranches().branches.find(
     (branch) => branch.name === currentBranch,
   );
-  const headCommitId = branch?.commit_id ?? null;
 
   const commitIndexById = useMemo(() => {
     const map = new Map<string, number>();
@@ -141,8 +140,7 @@ export function MainPanel() {
   }, [selectedCommitIds, commitIndexById, commits]);
 
   const canSquashSelection = useMemo(() => {
-    if (!canReset || !headCommitId || selectedInOrder.length < 2) return false;
-    if (selectedCommitIds.has(headCommitId)) return false;
+    if (!canReset || selectedInOrder.length < 2) return false;
 
     for (let i = 0; i < selectedInOrder.length - 1; i += 1) {
       const current = selectedInOrder[i];
@@ -152,7 +150,7 @@ export function MainPanel() {
     }
 
     return true;
-  }, [canReset, headCommitId, selectedInOrder, selectedCommitIds]);
+  }, [canReset, selectedInOrder]);
 
   const maxLanes = useMemo(() => {
     if (commits.length === 0) return 0;

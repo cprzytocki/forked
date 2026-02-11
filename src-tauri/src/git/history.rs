@@ -466,12 +466,6 @@ pub fn squash_commits(repo: &Repository, commit_ids: &[String]) -> Result<(), Gi
         }
         selected_oids.push(oid);
     }
-    if selected_set.contains(&head_oid) {
-        return Err(GitClientError::Operation(
-            "Cannot squash a selection that includes HEAD".to_string(),
-        ));
-    }
-
     let mut first_parent_chain: Vec<Oid> = Vec::new();
     let mut cursor = Some(head_oid);
     while let Some(oid) = cursor {
