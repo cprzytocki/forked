@@ -4,6 +4,8 @@ A fast, multiplatform desktop Git client built with Tauri, Rust, and React.
 
 ![Forked app screenshot](docs/images/app-screenshot.png)
 
+Get the latest app version from [Releases](https://github.com/cprzytocki/forked/releases/latest).
+
 ## Features
 
 - **Visual Commit Graph** — Browse commit history with a lane-based visual graph
