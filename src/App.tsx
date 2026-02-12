@@ -152,11 +152,14 @@ function App() {
             </div>
 
             {/* Sidebar resize handle */}
-            {/* biome-ignore lint/a11y/noStaticElementInteractions: resize drag handle */}
-            <div
-              className="h-full w-px flex-shrink-0 cursor-col-resize bg-border/70 transition-colors hover:bg-primary/60"
-              onMouseDown={handleSidebarMouseDown}
-            />
+            <div className="relative h-full w-px flex-shrink-0 bg-border/70 transition-colors hover:bg-primary/60">
+              <button
+                type="button"
+                aria-label="Resize sidebar"
+                className="absolute inset-y-0 -left-2 -right-2 cursor-col-resize"
+                onMouseDown={handleSidebarMouseDown}
+              />
+            </div>
 
             {/* Main content area - vertical split */}
             <div
@@ -171,11 +174,14 @@ function App() {
               {/* Draggable divider + Details panel */}
               {showDetailsPanel && (
                 <>
-                  {/* biome-ignore lint/a11y/noStaticElementInteractions: resize drag handle */}
-                  <div
-                    className="h-px flex-shrink-0 cursor-row-resize bg-border/70 transition-colors hover:bg-primary/60"
-                    onMouseDown={handleMouseDown}
-                  />
+                  <div className="relative h-px flex-shrink-0 bg-border/70 transition-colors hover:bg-primary/60">
+                    <button
+                      type="button"
+                      aria-label="Resize details panel"
+                      className="absolute inset-x-0 -top-2 -bottom-2 cursor-row-resize"
+                      onMouseDown={handleMouseDown}
+                    />
+                  </div>
                   <div
                     style={{ height: detailsPanelHeight }}
                     className="flex-shrink-0 overflow-hidden"
