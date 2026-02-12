@@ -1,5 +1,5 @@
 import { listen } from '@tauri-apps/api/event';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { CreateBranchDialog } from '@/components/branch/CreateBranchDialog';
 import { DetailsPanel } from '@/components/layout/DetailsPanel';
 import { Header } from '@/components/layout/Header';
@@ -78,19 +78,19 @@ function App() {
     };
   }, [repoInfo]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     isDragging.current = true;
     document.body.style.cursor = 'row-resize';
     document.body.style.userSelect = 'none';
-  }, []);
+  };
 
-  const handleSidebarMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleSidebarMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     isSidebarDragging.current = true;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
-  }, []);
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {

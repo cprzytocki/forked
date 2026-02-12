@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { SplitHunkView } from '@/components/diff/SplitHunkView';
 import { splitDiffHunks } from '@/lib/splitDiff';
 import type { FileDiff } from '@/lib/types';
@@ -8,7 +7,7 @@ interface SplitDiffViewerProps {
 }
 
 export function SplitDiffViewer({ diff }: SplitDiffViewerProps) {
-  const splitHunks = useMemo(() => splitDiffHunks(diff.hunks), [diff.hunks]);
+  const splitHunks = splitDiffHunks(diff.hunks);
 
   if (diff.is_binary) {
     return (

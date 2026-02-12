@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/common/Button';
 import { Dialog } from '@/components/common/Dialog/Dialog';
 import { DialogContent } from '@/components/common/Dialog/DialogContent';
@@ -35,21 +35,17 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         onConfirm();
       }
-    },
-    [onConfirm],
-  );
-
-  useEffect(() => {
-    if (!open) return;
+    };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, handleKeyDown]);
+  }, [open, onConfirm]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

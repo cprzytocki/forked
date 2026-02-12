@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export interface ContextMenuPosition {
   x: number;
@@ -15,19 +15,17 @@ interface ContextMenuProps {
 export function ContextMenu({ position, onClose, children }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const handleClose = useCallback(() => onClose(), [onClose]);
-
   useEffect(() => {
     if (!position) return;
 
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        handleClose();
+        onClose();
       }
     };
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
+      if (e.key === 'Escape') onClose();
     };
 
     const timer = setTimeout(() => {
@@ -40,7 +38,7 @@ export function ContextMenu({ position, onClose, children }: ContextMenuProps) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [position, handleClose]);
+  }, [position, onClose]);
 
   if (!position) return null;
 

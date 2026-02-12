@@ -1,5 +1,5 @@
 import { GitBranch, GitCommit, Loader2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BranchTrackingIndicators } from '@/components/branch/BranchTrackingIndicators';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -67,55 +67,51 @@ export function MainPanel() {
     (current) => current.name === currentBranch,
   );
 
-  const commitIndexById = useMemo(() => {
-    const map = new Map<string, number>();
-    commits.forEach((entry, index) => {
-      map.set(entry.commit.id, index);
-    });
-    return map;
-  }, [commits]);
+  const commitIndexById = new Map<string, number>();
+  commits.forEach((entry, index) => {
+    commitIndexById.set(entry.commit.id, index);
+  });
 
-  const selectedInOrder = useMemo(() => {
-    return Array.from(selectedCommitIds)
-      .map((id) => {
-        const index = commitIndexById.get(id);
-        if (index === undefined) return null;
-        return { id, index, commit: commits[index].commit };
-      })
-      .filter(
-        (item): item is { id: string; index: number; commit: CommitInfo } =>
-          item !== null,
-      )
-      .sort((a, b) => a.index - b.index);
-  }, [selectedCommitIds, commitIndexById, commits]);
+  const selectedInOrder = Array.from(selectedCommitIds)
+    .map((id) => {
+      const index = commitIndexById.get(id);
+      if (index === undefined) return null;
+      return { id, index, commit: commits[index].commit };
+    })
+    .filter(
+      (item): item is { id: string; index: number; commit: CommitInfo } =>
+        item !== null,
+    )
+    .sort((a, b) => a.index - b.index);
 
-  const canSquashSelection = useMemo(() => {
-    if (!canReset || selectedInOrder.length < 2) return false;
-
+  let canSquashSelection = canReset && selectedInOrder.length >= 2;
+  if (canSquashSelection) {
     for (let i = 0; i < selectedInOrder.length - 1; i += 1) {
       const current = selectedInOrder[i];
       const next = selectedInOrder[i + 1];
-      if (next.index !== current.index + 1) return false;
-      if (current.commit.parent_ids[0] !== next.commit.id) return false;
+      if (
+        next.index !== current.index + 1 ||
+        current.commit.parent_ids[0] !== next.commit.id
+      ) {
+        canSquashSelection = false;
+        break;
+      }
     }
+  }
 
-    return true;
-  }, [canReset, selectedInOrder]);
-
-  const maxLanes = useMemo(() => {
-    if (commits.length === 0) return 0;
-    let max = 0;
+  let maxLanes = 0;
+  if (commits.length > 0) {
     for (const entry of commits) {
-      max = Math.max(max, entry.graph.lane);
+      maxLanes = Math.max(maxLanes, entry.graph.lane);
       for (const connection of entry.graph.connections_to_parents) {
-        max = Math.max(max, connection.to_lane);
+        maxLanes = Math.max(maxLanes, connection.to_lane);
       }
       for (const passThrough of entry.graph.pass_through_lanes) {
-        max = Math.max(max, passThrough.lane);
+        maxLanes = Math.max(maxLanes, passThrough.lane);
       }
     }
-    return max + 1;
-  }, [commits]);
+    maxLanes += 1;
+  }
 
   const selectSingleCommit = (commit: CommitInfo) => {
     setSelectedCommitIds(new Set([commit.id]));
