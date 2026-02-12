@@ -219,17 +219,17 @@ export function MainPanel() {
         <GitBranch className="h-4 w-4" />
         <span className="font-semibold text-sm">
           {currentBranch || 'No branch'}
-          {isViewingDifferentBranch ? (
-            <span className="font-normal text-muted-foreground">
-              {' '}
-              (viewing {viewingBranch})
-            </span>
-          ) : null}
         </span>
         <BranchTrackingIndicators
           ahead={branch?.ahead}
           behind={branch?.behind}
         />
+        {isViewingDifferentBranch ? (
+          <span className="font-normal text-muted-foreground">
+            {' '}
+            (viewing {viewingBranch})
+          </span>
+        ) : null}
         <span className="text-xs text-muted-foreground ml-auto">
           {commits.length}
           {hasMoreCommits ? '+' : ''} commits
