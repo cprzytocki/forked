@@ -29,7 +29,7 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full flex-col border-r border-border/40 bg-sidebar">
-      <div className="m-2 flex rounded-lg border border-border/40 bg-card/70 p-1 shadow-xs">
+      <div className="flex mt-0.5 rounded-lg border border-border/40 bg-card/70">
         {tabs.map((tab) => (
           <button
             key={tab.id}
