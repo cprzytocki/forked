@@ -9,8 +9,8 @@ import type { SidebarTab } from '@/stores/uiStore';
 import { useUiStore } from '@/stores/uiStore';
 
 const tabs: { id: SidebarTab; label: string; icon: typeof FileText }[] = [
-  { id: 'changes', label: 'Changes', icon: FileText },
   { id: 'branches', label: 'Branches', icon: GitBranch },
+  { id: 'changes', label: 'Changes', icon: FileText },
 ];
 
 export function Sidebar() {
@@ -29,7 +29,7 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full flex-col border-r border-border/40 bg-sidebar">
-      <div className="flex mt-0.5 rounded-lg border border-border/40 bg-card/70">
+      <div className="flex m-1 rounded-lg border border-border/40 bg-card/70">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -45,7 +45,7 @@ export function Sidebar() {
             <tab.icon className="h-4 w-4" />
             {tab.label}
             {tab.id === 'changes' && totalChanges > 0 && (
-              <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-secondary-foreground">
+              <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
                 {totalChanges}
               </span>
             )}
@@ -56,7 +56,7 @@ export function Sidebar() {
       {sidebarTab === 'changes' ? (
         <>
           <ScrollArea className="flex-1">
-            <div className="p-2">
+            <div className="py-1">
               {conflictedFiles.length > 0 && (
                 <SidebarFileSection
                   title="Conflicts"

@@ -28,7 +28,7 @@ export function BranchList() {
         <BranchSection
           title="Local"
           branches={localBranches}
-          className="py-2"
+          className="py-1"
           action={
             <Button
               variant="ghost"

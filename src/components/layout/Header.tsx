@@ -1,7 +1,7 @@
 import {
   Archive,
   Download,
-  FolderOpen,
+  FolderX,
   GitFork,
   Loader2,
   Moon,
@@ -115,7 +115,7 @@ export function Header() {
             title="Close repository"
             aria-label="Close repository"
           >
-            <FolderOpen className="h-4 w-4" />
+            <FolderX className="h-4 w-4" />
           </Button>
         )}
         <Button
