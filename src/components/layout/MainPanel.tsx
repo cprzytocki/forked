@@ -318,7 +318,7 @@ export function MainPanel() {
                 setContextMenu(null);
               }}
             >
-              Squash Commits
+              {`Squash ${selectedInOrder.length} Commits`}
             </ContextMenuItem>
           )}
           <ContextMenuItem
@@ -331,7 +331,7 @@ export function MainPanel() {
               setContextMenu(null);
             }}
           >
-            Soft Reset to Here
+            {`Soft Reset to ${contextMenu.commit.short_id}`}
           </ContextMenuItem>
           <ContextMenuItem
             destructive
@@ -344,7 +344,7 @@ export function MainPanel() {
               setContextMenu(null);
             }}
           >
-            Hard Reset to Here
+            {`Hard Reset to ${contextMenu.commit.short_id}`}
           </ContextMenuItem>
         </ContextMenu>
       )}
@@ -399,7 +399,7 @@ export function MainPanel() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Squash Commits</DialogTitle>
+            <DialogTitle>{`Squash ${squashConfirm?.commits.length ?? 0} Commits`}</DialogTitle>
             <DialogDescription>
               These commits will be squashed into one. Edit the new commit
               message below.
