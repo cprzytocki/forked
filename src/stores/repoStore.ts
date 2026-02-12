@@ -9,6 +9,7 @@ import type {
   RepoStatus,
   StashEntry,
 } from '@/lib/types';
+import { runAction, runWithLoading } from './storeHelpers';
 
 interface RepoState {
   // Repository state
@@ -99,42 +100,27 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   stashes: [],
 
   openRepository: async (path: string) => {
-    set({ isLoading: true, error: null });
-    try {
+    await runWithLoading(set, async () => {
       const repoInfo = await tauri.openRepository(path);
       set({ repoInfo, currentBranch: repoInfo.head_name });
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    } finally {
-      set({ isLoading: false });
-    }
+    });
   },
 
   initRepository: async (path: string) => {
-    set({ isLoading: true, error: null });
-    try {
+    await runWithLoading(set, async () => {
       const repoInfo = await tauri.initRepository(path);
       set({ repoInfo, currentBranch: repoInfo.head_name });
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    } finally {
-      set({ isLoading: false });
-    }
+    });
   },
 
   cloneRepository: async (url: string, path: string) => {
-    set({ isLoading: true, error: null });
-    try {
+    await runWithLoading(set, async () => {
       const repoInfo = await tauri.cloneRepository(url, path);
       set({ repoInfo, currentBranch: repoInfo.head_name });
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    } finally {
-      set({ isLoading: false });
-    }
+    });
   },
 
   closeRepository: () => {
@@ -155,12 +141,10 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   refreshStatus: async () => {
-    try {
+    await runAction(set, async () => {
       const status = await tauri.getStatus();
       set({ status });
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   refreshCommits: async (limit = 50) => {
@@ -203,13 +187,11 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   refreshBranches: async () => {
-    try {
+    await runAction(set, async () => {
       const branches = await tauri.listBranches();
       const currentBranch = branches.find((b) => b.is_head)?.name || null;
       set({ branches, currentBranch });
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   refreshRemotes: async () => {
@@ -241,70 +223,56 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   stageFile: async (path: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.stageFile(path);
       await get().refreshStatus();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   unstageFile: async (path: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.unstageFile(path);
       await get().refreshStatus();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   stageAll: async () => {
-    try {
+    await runAction(set, async () => {
       await tauri.stageAll();
       await get().refreshStatus();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   unstageAll: async () => {
-    try {
+    await runAction(set, async () => {
       await tauri.unstageAll();
       await get().refreshStatus();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   discardChanges: async (path: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.discardChanges(path);
       await get().refreshStatus();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   discardAll: async () => {
-    try {
+    await runAction(set, async () => {
       await tauri.discardAllChanges();
       await get().refreshStatus();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   createCommit: async (message: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.createCommit(message);
       await Promise.all([
         get().refreshStatus(),
         get().refreshCommits(),
         get().refreshBranches(),
       ]);
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   selectCommit: (commit: CommitInfo | null) => {
@@ -312,49 +280,39 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   resetToCommit: async (commitId: string, mode: 'soft' | 'hard') => {
-    try {
+    await runAction(set, async () => {
       await tauri.resetToCommit(commitId, mode);
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   squashCommits: async (commitIds: string[], message: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.squashCommits(commitIds, message);
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   createBranch: async (name: string, sourceBranch?: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.createBranch(name, sourceBranch);
       await get().refreshBranches();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   checkoutBranch: async (name: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.checkoutBranch(name);
       set({ viewingBranch: null });
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   deleteBranch: async (name: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.deleteBranch(name);
       await get().refreshBranches();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   mergeBranch: async (name: string) => {
@@ -380,78 +338,55 @@ export const useRepoStore = create<RepoState>((set, get) => ({
   },
 
   fetch: async (remote: string) => {
-    set({ isLoading: true });
-    try {
+    await runWithLoading(set, async () => {
       await tauri.fetchRemote(remote);
       await get().refreshBranches();
-    } catch (e) {
-      set({ error: String(e) });
-    } finally {
-      set({ isLoading: false });
-    }
+    }, false);
   },
 
   pull: async (remote: string, branch: string) => {
-    set({ isLoading: true });
-    try {
+    await runWithLoading(set, async () => {
       const result = await tauri.pullRemote(remote, branch);
       if (!result.success) {
         set({ error: result.message });
       }
       await get().refreshAll();
-    } catch (e) {
-      set({ error: String(e) });
-    } finally {
-      set({ isLoading: false });
-    }
+    }, false);
   },
 
   push: async (remote: string, branch: string) => {
-    set({ isLoading: true });
-    try {
+    await runWithLoading(set, async () => {
       await tauri.pushRemote(remote, branch);
       await get().refreshBranches();
-    } catch (e) {
-      set({ error: String(e) });
-    } finally {
-      set({ isLoading: false });
-    }
+    }, false);
   },
 
   stashSave: async (message?: string) => {
-    try {
+    await runAction(set, async () => {
       await tauri.stashSave(message);
       await Promise.all([get().refreshStatus(), get().refreshStashes()]);
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   stashPop: async (index: number) => {
-    try {
+    await runAction(set, async () => {
       await tauri.stashPop(index);
       await Promise.all([get().refreshStatus(), get().refreshStashes()]);
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   stashApply: async (index: number) => {
-    try {
+    await runAction(set, async () => {
       await tauri.stashApply(index);
       await Promise.all([get().refreshStatus(), get().refreshStashes()]);
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   stashDrop: async (index: number) => {
-    try {
+    await runAction(set, async () => {
       await tauri.stashDrop(index);
       await get().refreshStashes();
-    } catch (e) {
-      set({ error: String(e) });
-    }
+    });
   },
 
   clearError: () => set({ error: null }),
