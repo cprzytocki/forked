@@ -2,6 +2,8 @@
 
 A fast, multiplatform desktop Git client built with Tauri, Rust, and React.
 
+![Forked app screenshot](docs/images/app-screenshot.png)
+
 ## Features
 
 - **Visual Commit Graph** — Browse commit history with a lane-based visual graph
