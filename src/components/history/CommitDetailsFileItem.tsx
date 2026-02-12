@@ -27,10 +27,10 @@ export function CommitDetailsFileItem({
   );
 
   return (
-    <div className="border-b last:border-b-0">
+    <div className="border-b border-border/40 last:border-b-0">
       <button
         type="button"
-        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent w-full text-left"
+        className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors duration-100 hover:bg-accent/40"
         onClick={onToggle}
       >
         {isExpanded ? (
@@ -43,13 +43,13 @@ export function CommitDetailsFileItem({
         </span>
         <span className="ml-auto flex items-center gap-2 text-xs">
           {additions > 0 && (
-            <span className="text-green-500 flex items-center">
+            <span className="flex items-center text-git-added">
               <Plus className="h-3 w-3" />
               {additions}
             </span>
           )}
           {deletions > 0 && (
-            <span className="text-red-500 flex items-center">
+            <span className="flex items-center text-git-removed">
               <Minus className="h-3 w-3" />
               {deletions}
             </span>
@@ -57,7 +57,7 @@ export function CommitDetailsFileItem({
         </span>
       </button>
       {isExpanded && (
-        <div className="border-t">
+        <div className="border-t border-border/30">
           {diffViewMode === 'split' ? (
             <SplitDiffViewer diff={file} />
           ) : (

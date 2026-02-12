@@ -32,7 +32,7 @@ export function BranchSection({
       <div className="flex items-center gap-1 px-2 py-1">
         <button
           type="button"
-          className="flex flex-1 items-center gap-1 cursor-pointer rounded-sm text-left"
+          className="flex flex-1 cursor-pointer items-center gap-1 rounded-md text-left transition-colors duration-100 hover:bg-accent/30"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? (
@@ -40,7 +40,7 @@ export function BranchSection({
           ) : (
             <ChevronRight className="h-4 w-4" />
           )}
-          <span className="flex-1 text-xs font-medium text-muted-foreground">
+          <span className="flex-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
             {title}
           </span>
           <span className="text-xs text-muted-foreground">

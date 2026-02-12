@@ -89,14 +89,21 @@ export async function getCommitHistoryWithGraph(
   skip: number = 0,
   branchName?: string | null,
 ): Promise<CommitGraphEntry[]> {
-  return invoke('get_commit_history_with_graph', { limit, skip, branchName: branchName ?? null });
+  return invoke('get_commit_history_with_graph', {
+    limit,
+    skip,
+    branchName: branchName ?? null,
+  });
 }
 
 export async function getCommitDetails(oid: string): Promise<CommitDetails> {
   return invoke('get_commit_details', { oid });
 }
 
-export async function resetToCommit(commitId: string, mode: 'soft' | 'hard'): Promise<void> {
+export async function resetToCommit(
+  commitId: string,
+  mode: 'soft' | 'hard',
+): Promise<void> {
   return invoke('reset_to_commit', { commitId, mode });
 }
 
@@ -112,7 +119,10 @@ export async function listBranches(): Promise<BranchInfo[]> {
   return invoke('list_branches');
 }
 
-export async function createBranch(name: string, sourceBranch?: string): Promise<BranchInfo> {
+export async function createBranch(
+  name: string,
+  sourceBranch?: string,
+): Promise<BranchInfo> {
   return invoke('create_branch', { name, sourceBranch });
 }
 

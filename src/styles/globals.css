@@ -4,86 +4,86 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --background: 42 33% 97%;
+    --foreground: 232 20% 15%;
+    --card: 38 36% 99%;
+    --card-foreground: 232 20% 15%;
+    --popover: 38 36% 99%;
+    --popover-foreground: 232 20% 15%;
+    --primary: 234 80% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 24% 93%;
+    --secondary-foreground: 232 18% 24%;
+    --muted: 36 22% 92%;
+    --muted-foreground: 231 10% 42%;
+    --accent: 36 25% 91%;
+    --accent-foreground: 232 20% 18%;
+    --destructive: 1 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 33 18% 84%;
+    --input: 33 18% 84%;
+    --ring: 234 78% 63%;
+    --sidebar: 38 32% 95%;
+    --surface-hover: 36 40% 92%;
+    --radius: 0.625rem;
 
-    /* Git colors */
-    --git-added: 142 76% 36%;
-    --git-removed: 0 84% 60%;
-    --git-modified: 38 92% 50%;
-    --git-renamed: 217 91% 60%;
-    --git-untracked: 215 16% 47%;
+    --git-added: 148 66% 38%;
+    --git-removed: 2 74% 56%;
+    --git-modified: 39 91% 52%;
+    --git-renamed: 222 84% 58%;
+    --git-untracked: 232 13% 49%;
 
-    /* Branch graph colors */
-    --branch-0: 210 100% 50%;
-    --branch-1: 142 70% 40%;
-    --branch-2: 340 82% 52%;
-    --branch-3: 38 92% 50%;
-    --branch-4: 262 80% 55%;
-    --branch-5: 180 70% 40%;
-    --branch-6: 16 85% 55%;
-    --branch-7: 300 60% 50%;
-    --branch-8: 90 60% 40%;
-    --branch-9: 200 80% 60%;
+    --branch-0: 221 84% 56%;
+    --branch-1: 150 60% 38%;
+    --branch-2: 339 80% 54%;
+    --branch-3: 38 90% 50%;
+    --branch-4: 262 72% 57%;
+    --branch-5: 184 64% 40%;
+    --branch-6: 16 80% 53%;
+    --branch-7: 294 58% 49%;
+    --branch-8: 94 52% 38%;
+    --branch-9: 200 74% 53%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 240 6% 9%;
+    --foreground: 32 22% 92%;
+    --card: 240 7% 12%;
+    --card-foreground: 34 18% 92%;
+    --popover: 240 7% 12%;
+    --popover-foreground: 34 18% 92%;
+    --primary: 234 86% 66%;
+    --primary-foreground: 240 10% 11%;
+    --secondary: 240 6% 16%;
+    --secondary-foreground: 32 18% 88%;
+    --muted: 240 6% 15%;
+    --muted-foreground: 236 11% 68%;
+    --accent: 240 6% 19%;
+    --accent-foreground: 34 18% 92%;
+    --destructive: 2 68% 57%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 5% 23%;
+    --input: 240 5% 23%;
+    --ring: 234 84% 68%;
+    --sidebar: 240 6% 11%;
+    --surface-hover: 240 6% 16%;
 
-    /* Git colors - dark mode */
-    --git-added: 142 70% 45%;
-    --git-removed: 0 72% 51%;
-    --git-modified: 38 92% 50%;
-    --git-renamed: 217 91% 65%;
-    --git-untracked: 215 20% 65%;
+    --git-added: 148 60% 50%;
+    --git-removed: 1 78% 63%;
+    --git-modified: 39 92% 59%;
+    --git-renamed: 222 89% 68%;
+    --git-untracked: 233 13% 66%;
 
-    /* Branch graph colors - dark mode */
-    --branch-0: 210 100% 60%;
-    --branch-1: 142 70% 55%;
-    --branch-2: 340 82% 60%;
-    --branch-3: 38 92% 55%;
-    --branch-4: 262 80% 65%;
-    --branch-5: 180 70% 55%;
-    --branch-6: 16 85% 60%;
-    --branch-7: 300 60% 60%;
-    --branch-8: 90 60% 55%;
-    --branch-9: 200 80% 65%;
+    --branch-0: 221 88% 66%;
+    --branch-1: 148 60% 55%;
+    --branch-2: 340 82% 65%;
+    --branch-3: 39 92% 61%;
+    --branch-4: 264 78% 67%;
+    --branch-5: 185 65% 57%;
+    --branch-6: 17 84% 63%;
+    --branch-7: 296 62% 66%;
+    --branch-8: 95 56% 57%;
+    --branch-9: 201 80% 67%;
   }
 }
 
@@ -91,52 +91,49 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
   }
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-muted;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/30 rounded;
+  @apply rounded-full bg-muted-foreground/25;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/50;
+  @apply bg-muted-foreground/40;
 }
 
-/* Prevent text selection on UI elements */
 .select-none {
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* Diff colors */
 .diff-add {
-  @apply bg-git-added/20 text-git-added;
+  @apply bg-git-added/15 text-git-added;
 }
 
 .diff-remove {
-  @apply bg-git-removed/20 text-git-removed;
+  @apply bg-git-removed/15 text-git-removed;
 }
 
 .diff-hunk-header {
-  @apply bg-muted text-muted-foreground;
+  @apply bg-muted/40 text-muted-foreground;
 }
 
-/* File status colors */
 .status-modified {
   @apply text-git-modified;
 }
@@ -157,11 +154,10 @@
   @apply text-git-untracked;
 }
 
-/* Branch label badges */
 .branch-badge {
-  @apply inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium leading-none whitespace-nowrap;
+  @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none whitespace-nowrap shadow-xs;
 }
 
 .tag-badge {
-  @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium leading-none whitespace-nowrap bg-secondary text-secondary-foreground;
+  @apply inline-flex items-center gap-1 rounded-md bg-secondary/90 px-1.5 py-0.5 text-[11px] font-medium leading-none whitespace-nowrap text-secondary-foreground;
 }

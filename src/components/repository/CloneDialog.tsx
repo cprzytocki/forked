@@ -50,8 +50,8 @@ export function CloneDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="clone-url" className="text-sm font-medium">
-              Repository URL
+            <label htmlFor="clone-url" className="block text-sm font-medium">
+              <span className="mb-1.5 block">Repository URL</span>
               <Input
                 id="clone-url"
                 placeholder="https://github.com/user/repo.git"
@@ -61,8 +61,8 @@ export function CloneDialog() {
             </label>
           </div>
           <div className="space-y-2">
-            <label htmlFor="clone-path" className="text-sm font-medium">
-              Clone to
+            <label htmlFor="clone-path" className="block text-sm font-medium">
+              <span className="mb-1.5 block">Clone to</span>
               <div className="flex gap-2">
                 <Input
                   id="clone-path"

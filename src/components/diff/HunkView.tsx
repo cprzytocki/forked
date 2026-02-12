@@ -7,8 +7,8 @@ interface HunkViewProps {
 
 export function HunkView({ hunk }: HunkViewProps) {
   return (
-    <div className="border-b last:border-b-0">
-      <div className="bg-muted px-2 py-1 text-xs font-mono text-muted-foreground sticky top-0">
+    <div className="border-b border-border/40 last:border-b-0">
+      <div className="sticky top-0 bg-muted/40 px-3 py-1.5 font-mono text-xs text-muted-foreground">
         {hunk.header.trim()}
       </div>
       <div>

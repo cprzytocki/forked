@@ -92,8 +92,8 @@ export function CreateBranchDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="branch-name" className="text-sm font-medium">
-              Branch Name
+            <label htmlFor="branch-name" className="block text-sm font-medium">
+              <span className="mb-1.5 block">Branch Name</span>
               <Input
                 id="branch-name"
                 placeholder="feature/my-branch"
@@ -105,15 +105,15 @@ export function CreateBranchDialog() {
             </label>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Source Branch
+            <label className="block text-sm font-medium">
+              <span className="mb-1.5 block">Source Branch</span>
               <div className="relative" ref={selectorRef}>
                 <button
                   type="button"
                   onClick={() => setSelectorOpen(!selectorOpen)}
                   className={cn(
-                    'flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                    'flex h-10 w-full items-center justify-between rounded-lg border border-border/60 bg-background/70 px-3 py-2 text-sm shadow-xs transition-all duration-150',
+                    'focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20',
                   )}
                 >
                   <span className="truncate">
@@ -122,14 +122,14 @@ export function CreateBranchDialog() {
                   <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
                 </button>
                 {selectorOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md">
+                  <div className="absolute z-50 mt-1 w-full rounded-lg border border-border/40 bg-popover/95 shadow-lifted backdrop-blur-lg">
                     <div className="p-1">
                       <input
                         type="text"
                         placeholder="Search branches..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="flex h-8 w-full rounded-sm bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground"
+                        className="flex h-8 w-full rounded-md border border-border/40 bg-background/60 px-2 py-1 text-sm outline-none placeholder:text-muted-foreground"
                         autoFocus
                       />
                     </div>

@@ -34,8 +34,11 @@ export function StashDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="stash-message" className="text-sm font-medium">
-              New Stash
+            <label
+              htmlFor="stash-message"
+              className="block text-sm font-medium"
+            >
+              <span className="mb-1.5 block">New Stash</span>
               <div className="flex gap-2">
                 <Input
                   id="stash-message"
@@ -55,11 +58,11 @@ export function StashDialog() {
           {stashes.length > 0 && (
             <div className="space-y-2">
               <span className="text-sm font-medium">Saved Stashes</span>
-              <ScrollArea className="h-48 border rounded-md">
+              <ScrollArea className="h-48 rounded-lg border border-border/40">
                 {stashes.map((stash) => (
                   <div
                     key={stash.index}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-accent group"
+                    className="group mx-1 flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-100 hover:bg-accent/50"
                   >
                     <span className="text-xs text-muted-foreground font-mono">
                       stash@{`{${stash.index}}`}
@@ -67,7 +70,7 @@ export function StashDialog() {
                     <span className="flex-1 text-sm truncate">
                       {stash.message}
                     </span>
-                    <div className="hidden group-hover:flex items-center gap-1">
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity duration-100 group-hover:opacity-100">
                       <Button
                         variant="ghost"
                         size="icon"

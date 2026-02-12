@@ -21,7 +21,7 @@ export function DetailsPanel() {
 
   if (isDiffLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+      <div className="flex h-full flex-col items-center justify-center text-muted-foreground/80">
         <Loader2 className="h-8 w-8 animate-spin mb-4" />
         <p>Loading...</p>
       </div>
@@ -30,7 +30,7 @@ export function DetailsPanel() {
 
   if (detailView === 'none') {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+      <div className="flex h-full flex-col items-center justify-center text-muted-foreground/80">
         <FileText className="h-12 w-12 mb-4" />
         <p>Select a file or commit to view details</p>
       </div>
@@ -40,7 +40,7 @@ export function DetailsPanel() {
   if (detailView === 'diff' && currentFileDiff) {
     return (
       <div className="flex flex-col h-full">
-        <div className="p-2 border-b">
+        <div className="border-b border-border/40 p-2">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             <span className="font-semibold text-sm truncate">
@@ -53,7 +53,7 @@ export function DetailsPanel() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
             <span
               className={
-                isSelectedFileStaged ? 'text-green-500' : 'text-yellow-500'
+                isSelectedFileStaged ? 'text-git-added' : 'text-git-modified'
               }
             >
               {isSelectedFileStaged ? 'Staged' : 'Unstaged'}
@@ -76,7 +76,7 @@ export function DetailsPanel() {
   if (detailView === 'commit' && selectedCommit && currentCommitDiff) {
     return (
       <div className="flex flex-col h-full">
-        <div className="p-2 border-b">
+        <div className="border-b border-border/40 p-2">
           <div className="flex items-center gap-2">
             <GitCommit className="h-4 w-4" />
             <span className="font-mono text-sm">
@@ -92,7 +92,7 @@ export function DetailsPanel() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+    <div className="flex h-full flex-col items-center justify-center text-muted-foreground/80">
       <FileText className="h-12 w-12 mb-4" />
       <p>No content to display</p>
     </div>

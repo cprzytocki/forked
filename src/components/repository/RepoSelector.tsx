@@ -44,7 +44,7 @@ export function RepoSelector() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full p-8">
+    <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-b from-background via-background to-secondary/35 p-8">
       <div className="max-w-md w-full">
         <div className="flex items-center justify-center mb-8">
           <GitBranch className="h-16 w-16 text-primary" />
@@ -54,29 +54,35 @@ export function RepoSelector() {
           A fast and beautiful Git client
         </p>
 
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="mb-8 grid grid-cols-3 gap-4">
           <Button
             variant="outline"
-            className="h-24 flex flex-col gap-2"
+            className="h-28 flex-col gap-2 rounded-xl"
             onClick={handleOpen}
           >
-            <FolderOpen className="h-8 w-8" />
+            <span className="rounded-full bg-secondary p-2 shadow-xs">
+              <FolderOpen className="h-6 w-6" />
+            </span>
             <span>Open</span>
           </Button>
           <Button
             variant="outline"
-            className="h-24 flex flex-col gap-2"
+            className="h-28 flex-col gap-2 rounded-xl"
             onClick={openInitDialog}
           >
-            <FolderPlus className="h-8 w-8" />
+            <span className="rounded-full bg-secondary p-2 shadow-xs">
+              <FolderPlus className="h-6 w-6" />
+            </span>
             <span>Init</span>
           </Button>
           <Button
             variant="outline"
-            className="h-24 flex flex-col gap-2"
+            className="h-28 flex-col gap-2 rounded-xl"
             onClick={openCloneDialog}
           >
-            <Download className="h-8 w-8" />
+            <span className="rounded-full bg-secondary p-2 shadow-xs">
+              <Download className="h-6 w-6" />
+            </span>
             <span>Clone</span>
           </Button>
         </div>
@@ -87,12 +93,12 @@ export function RepoSelector() {
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Recent Repositories</span>
             </div>
-            <ScrollArea className="h-48 border rounded-md">
+            <ScrollArea className="h-48 rounded-xl border border-border/50 bg-card/70 shadow-xs">
               {recentRepos.map((path) => (
                 <button
                   type="button"
                   key={path}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer group w-full text-left"
+                  className="group flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors duration-100 hover:bg-accent/50"
                   onClick={() => handleOpenRecent(path)}
                 >
                   <FolderOpen className="h-4 w-4 text-muted-foreground" />
@@ -100,7 +106,7 @@ export function RepoSelector() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                    className="h-6 w-6 opacity-0 transition-opacity duration-100 group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeRecentRepo(path);

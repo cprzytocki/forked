@@ -45,7 +45,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-12 border-b flex items-center px-4 gap-4 bg-background">
+    <header className="flex h-12 items-center gap-4 border-b border-border/40 bg-background/80 px-4 shadow-xs backdrop-blur-md">
       <div className="flex items-center gap-2">
         <GitFork className="h-5 w-5 text-primary" />
         <span className="font-semibold">{repoInfo?.name || 'Forked'}</span>
@@ -53,7 +53,7 @@ export function Header() {
 
       {repoInfo && (
         <>
-          <div className="flex items-center gap-1 ml-4">
+          <div className="ml-4 flex items-center gap-1 rounded-full border border-border/50 bg-card/70 p-0.5 shadow-xs">
             <Button
               variant="ghost"
               size="sm"
@@ -90,7 +90,7 @@ export function Header() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-1 ml-2">
+          <div className="ml-2 flex items-center gap-1 rounded-full border border-border/50 bg-card/70 p-0.5 shadow-xs">
             <Button
               variant="ghost"
               size="sm"
@@ -106,7 +106,7 @@ export function Header() {
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 rounded-full border border-border/50 bg-card/70 p-0.5 shadow-xs">
         {repoInfo && (
           <Button
             variant="ghost"
@@ -132,7 +132,6 @@ export function Header() {
           )}
         </Button>
       </div>
-
     </header>
   );
 }

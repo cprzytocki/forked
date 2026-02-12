@@ -7,14 +7,14 @@ export function DiffViewToggle() {
   const setDiffViewMode = useSettingsStore((s) => s.setDiffViewMode);
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5 rounded-md bg-secondary/50 p-0.5">
       <button
         type="button"
         className={cn(
-          'p-1 rounded',
+          'rounded px-1.5 py-1 transition-all duration-100',
           diffViewMode === 'unified'
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
+            ? 'bg-background text-foreground shadow-xs'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
         )}
         onClick={() => setDiffViewMode('unified')}
         title="Unified diff"
@@ -24,10 +24,10 @@ export function DiffViewToggle() {
       <button
         type="button"
         className={cn(
-          'p-1 rounded',
+          'rounded px-1.5 py-1 transition-all duration-100',
           diffViewMode === 'split'
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
+            ? 'bg-background text-foreground shadow-xs'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
         )}
         onClick={() => setDiffViewMode('split')}
         title="Side-by-side diff"

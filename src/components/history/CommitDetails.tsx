@@ -35,7 +35,7 @@ export function CommitDetails({ commit, diff }: CommitDetailsProps) {
 
   return (
     <div>
-      <div className="p-4 border-b bg-muted/50">
+      <div className="border-b border-border/40 bg-card p-4">
         <p className="text-sm mb-4">{commit.message}</p>
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
@@ -78,11 +78,11 @@ export function CommitDetails({ commit, diff }: CommitDetailsProps) {
         </div>
       </div>
 
-      <div className="p-2 border-b flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between border-b border-border/40 p-2 text-xs">
         <div className="flex items-center gap-4">
           <span>{diff.stats.files_changed} files changed</span>
-          <span className="text-green-500">+{diff.stats.insertions}</span>
-          <span className="text-red-500">-{diff.stats.deletions}</span>
+          <span className="text-git-added">+{diff.stats.insertions}</span>
+          <span className="text-git-removed">-{diff.stats.deletions}</span>
         </div>
         <div className="flex items-center gap-2">
           <button type="button" className="hover:underline" onClick={expandAll}>

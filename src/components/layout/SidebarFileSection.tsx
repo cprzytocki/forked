@@ -41,7 +41,7 @@ export function SidebarFileSection({
     <div className="mb-2">
       <button
         type="button"
-        className="flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-accent rounded-sm w-full text-left"
+        className="flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-left transition-colors duration-100 hover:bg-accent/40"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? (
@@ -49,7 +49,9 @@ export function SidebarFileSection({
         ) : (
           <ChevronRight className="h-4 w-4" />
         )}
-        <span className="flex-1 text-sm font-medium">{title}</span>
+        <span className="flex-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+          {title}
+        </span>
         {isStaged ? (
           <Button
             variant="ghost"

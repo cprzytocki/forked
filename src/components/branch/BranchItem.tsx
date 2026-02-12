@@ -28,8 +28,8 @@ export function BranchItem({ branch, onCheckout, onDelete }: BranchItemProps) {
     <button
       type="button"
       className={cn(
-        'group flex items-center gap-2 px-2 py-1.5 hover:bg-accent cursor-pointer w-full text-left',
-        branch.is_head && 'bg-accent',
+        'group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-100 hover:bg-accent/40',
+        branch.is_head && 'bg-accent/70 shadow-xs',
         isViewing && !branch.is_head && 'bg-accent/50',
       )}
       onClick={() => {
@@ -61,7 +61,7 @@ export function BranchItem({ branch, onCheckout, onDelete }: BranchItemProps) {
       <BranchTrackingIndicators ahead={branch.ahead} behind={branch.behind} />
       {branch.is_head && <Check className="h-4 w-4 text-green-500" />}
       {!branch.is_head && !branch.is_remote && (
-        <div className="hidden group-hover:flex items-center gap-1">
+        <div className="flex items-center gap-1 opacity-0 transition-opacity duration-100 group-hover:opacity-100">
           <Button
             variant="ghost"
             size="icon"

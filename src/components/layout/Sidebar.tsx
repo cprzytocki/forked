@@ -28,25 +28,25 @@ export function Sidebar() {
     stagedFiles.length + unstagedFiles.length + conflictedFiles.length;
 
   return (
-    <div className="flex flex-col h-full border-r">
-      <div className="flex border-b">
+    <div className="flex h-full flex-col border-r border-border/40 bg-sidebar">
+      <div className="m-2 flex rounded-lg border border-border/40 bg-card/70 p-1 shadow-xs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             className={cn(
-              'flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-sm font-medium transition-colors',
+              'flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150',
               sidebarTab === tab.id
-                ? 'text-foreground border-b-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-background text-foreground shadow-xs'
+                : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground',
             )}
             onClick={() => setSidebarTab(tab.id)}
           >
             <tab.icon className="h-4 w-4" />
             {tab.label}
             {tab.id === 'changes' && totalChanges > 0 && (
-              <span className="text-xs text-muted-foreground">
-                ({totalChanges})
+              <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-secondary-foreground">
+                {totalChanges}
               </span>
             )}
           </button>

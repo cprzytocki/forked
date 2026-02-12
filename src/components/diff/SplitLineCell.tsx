@@ -10,18 +10,18 @@ interface SplitLineCellProps {
 
 export function SplitLineCell({ line, side, segments }: SplitLineCellProps) {
   if (!line) {
-    return <div className="flex font-mono text-xs bg-muted/30" />;
+    return <div className="flex bg-muted/15 font-mono text-xs" />;
   }
 
   const isAdd = line.origin === '+';
   const isDel = line.origin === '-';
 
-  const bgClass = isDel ? 'bg-red-500/15' : isAdd ? 'bg-green-500/15' : '';
+  const bgClass = isDel ? 'bg-git-removed/15' : isAdd ? 'bg-git-added/15' : '';
 
   const highlightClass = isDel
-    ? 'bg-red-500/30'
+    ? 'bg-git-removed/30'
     : isAdd
-      ? 'bg-green-500/30'
+      ? 'bg-git-added/30'
       : '';
 
   const lineNo = side === 'left' ? line.old_lineno : line.new_lineno;

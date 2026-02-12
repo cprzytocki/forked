@@ -48,8 +48,8 @@ export function InitDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="init-path" className="text-sm font-medium">
-              Location
+            <label htmlFor="init-path" className="block text-sm font-medium">
+              <span className="mb-1.5 block">Location</span>
               <div className="flex gap-2">
                 <Input
                   id="init-path"

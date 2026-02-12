@@ -133,7 +133,7 @@ function App() {
       <Header />
 
       {error && (
-        <div className="bg-destructive text-destructive-foreground px-4 py-2 text-sm">
+        <div className="mx-3 mt-3 rounded-lg border border-destructive/30 bg-destructive/90 px-4 py-2 text-sm text-destructive-foreground shadow-soft backdrop-blur-md">
           {error}
           <button type="button" className="ml-4 underline" onClick={clearError}>
             Dismiss
@@ -154,7 +154,7 @@ function App() {
             {/* Sidebar resize handle */}
             {/* biome-ignore lint/a11y/noStaticElementInteractions: resize drag handle */}
             <div
-              className="flex-shrink-0 w-1 cursor-col-resize bg-border hover:bg-primary/50 transition-colors"
+              className="h-full w-px flex-shrink-0 cursor-col-resize bg-border/70 transition-colors hover:bg-primary/60"
               onMouseDown={handleSidebarMouseDown}
             />
 
@@ -173,12 +173,12 @@ function App() {
                 <>
                   {/* biome-ignore lint/a11y/noStaticElementInteractions: resize drag handle */}
                   <div
-                    className="flex-shrink-0 h-1 cursor-row-resize bg-border hover:bg-primary/50 transition-colors"
+                    className="h-px flex-shrink-0 cursor-row-resize bg-border/70 transition-colors hover:bg-primary/60"
                     onMouseDown={handleMouseDown}
                   />
                   <div
                     style={{ height: detailsPanelHeight }}
-                    className="flex-shrink-0 overflow-hidden border-t"
+                    className="flex-shrink-0 overflow-hidden"
                   >
                     <DetailsPanel />
                   </div>

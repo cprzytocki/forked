@@ -215,7 +215,7 @@ export function MainPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-2 border-b flex items-center gap-2">
+      <div className="flex items-center gap-2 border-b border-border/40 p-2">
         <GitBranch className="h-4 w-4" />
         <span className="font-semibold text-sm">
           {currentBranch || 'No branch'}
@@ -237,12 +237,12 @@ export function MainPanel() {
       </div>
 
       {commits.length > 0 && (
-        <div className="flex items-center border-b bg-muted/30 text-[11px] text-muted-foreground uppercase tracking-wider font-medium select-none">
+        <div className="select-none border-b border-border/40 bg-muted/30 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           <div
             className="flex-shrink-0"
             style={{ width: Math.max((maxLanes + 1) * 16, 48) }}
           />
-          <div className="flex-1 min-w-0 px-2 py-1">Description</div>
+          <div className="min-w-0 flex-1 px-2 py-1">Description</div>
           <div className="flex-shrink-0 w-[120px] px-2 py-1">Author</div>
           <div className="flex-shrink-0 w-[70px] px-2 py-1">Hash</div>
           <div className="flex-shrink-0 w-[100px] px-2 pr-3 py-1 text-right">
@@ -407,7 +407,7 @@ export function MainPanel() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="max-h-32 overflow-auto rounded-md border bg-muted/20 p-2">
+            <div className="max-h-32 overflow-auto rounded-lg border border-border/40 bg-muted/20 p-2">
               <ul className="space-y-1.5">
                 {squashConfirm?.commits.map((commit) => (
                   <li key={commit.id} className="text-xs text-muted-foreground">
@@ -426,7 +426,7 @@ export function MainPanel() {
               </label>
               <textarea
                 id="squash-message"
-                className="mt-1 w-full h-36 p-2 text-sm bg-background border rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                className="mt-1 h-36 w-full resize-none rounded-lg border border-border/60 bg-background/80 p-2 text-sm shadow-inset transition-all duration-150 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring/20"
                 value={squashConfirm?.message ?? ''}
                 onChange={(e) =>
                   setSquashConfirm((previous) =>

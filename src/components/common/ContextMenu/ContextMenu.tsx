@@ -47,7 +47,7 @@ export function ContextMenu({ position, onClose, children }: ContextMenuProps) {
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-[180px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+      className="fixed z-50 min-w-[180px] rounded-lg border border-border/40 bg-popover/95 p-1 text-popover-foreground shadow-lifted backdrop-blur-lg"
       style={{ left: position.x, top: position.y }}
     >
       {children}

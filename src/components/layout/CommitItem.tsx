@@ -26,8 +26,8 @@ export function CommitItem({
       type="button"
       className={cn(
         'pl-1 flex items-center cursor-pointer transition-colors w-full text-left',
-        'hover:bg-accent/50',
-        isSelected && 'bg-accent',
+        'hover:bg-surface-hover',
+        isSelected && 'bg-accent/70',
       )}
       onClick={onSelect}
       onContextMenu={onContextMenu}
@@ -55,20 +55,20 @@ export function CommitItem({
             {name}
           </span>
         ))}
-        <span className="text-[13px] font-medium truncate">
+        <span className="truncate text-[13px] font-normal">
           {commit.summary}
         </span>
       </div>
 
-      <div className="flex-shrink-0 w-[120px] px-2 text-xs text-muted-foreground truncate">
+      <div className="w-[120px] flex-shrink-0 truncate px-2 text-xs text-muted-foreground/90">
         {commit.author_name}
       </div>
 
-      <div className="flex-shrink-0 w-[70px] px-2 font-mono text-[11px] text-muted-foreground">
+      <div className="w-[70px] flex-shrink-0 px-2 font-mono text-[11px] text-muted-foreground/80">
         {commit.short_id}
       </div>
 
-      <div className="flex-shrink-0 w-[100px] px-2 pr-3 text-xs text-muted-foreground text-right">
+      <div className="w-[100px] flex-shrink-0 px-2 pr-3 text-right text-xs text-muted-foreground/80">
         {formatRelativeTime(commit.time)}
       </div>
     </button>

@@ -23,9 +23,9 @@ export function SidebarCommitBox() {
   };
 
   return (
-    <div className="p-2 border-t">
+    <div className="border-t border-border/40 p-2">
       <textarea
-        className="w-full h-20 p-2 text-sm bg-background border rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+        className="h-20 w-full resize-none rounded-lg border border-border/60 bg-background/80 p-2 text-sm shadow-inset transition-all duration-150 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring/20"
         placeholder="Commit message..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}

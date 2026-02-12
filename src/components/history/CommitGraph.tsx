@@ -2,8 +2,8 @@ import type { GraphNode } from '@/lib/types';
 import { getBranchColorHsl } from '@/lib/utils';
 
 const LANE_WIDTH = 16;
-const NODE_RADIUS = 4;
-const MERGE_RADIUS = 5;
+const NODE_RADIUS = 4.5;
+const MERGE_RADIUS = 5.5;
 const ROW_HEIGHT = 36;
 
 interface CommitGraphProps {
