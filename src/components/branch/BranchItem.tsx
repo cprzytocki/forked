@@ -52,13 +52,13 @@ export function BranchItem({ branch, onCheckout, onDelete }: BranchItemProps) {
       ) : (
         <GitBranch className="h-4 w-4 text-muted-foreground" />
       )}
-      <span className="flex-1 text-sm truncate">
-        {branch.name}
+      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        <span className="truncate text-sm">{branch.name}</span>
         {branch.is_default && (
-          <Star className="inline h-3 w-3 ml-1 text-yellow-500 fill-yellow-500 align-middle" />
+          <Star className="h-3 w-3 shrink-0 fill-yellow-500 text-yellow-500" />
         )}
-      </span>
-      <BranchTrackingIndicators ahead={branch.ahead} behind={branch.behind} />
+        <BranchTrackingIndicators ahead={branch.ahead} behind={branch.behind} />
+      </div>
       {branch.is_head && <Check className="h-4 w-4 text-green-500" />}
       {!branch.is_head && !branch.is_remote && (
         <div className="flex items-center gap-1 opacity-0 transition-opacity duration-100 group-hover:opacity-100">
