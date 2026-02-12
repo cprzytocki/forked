@@ -60,7 +60,7 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set, get) => ({
   viewMode: 'changes',
-  sidebarTab: 'changes',
+  sidebarTab: 'branches',
   detailView: 'none',
   selectedFile: null,
   selectedFilePath: null,
