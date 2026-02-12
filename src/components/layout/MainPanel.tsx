@@ -237,7 +237,7 @@ export function MainPanel() {
       </div>
 
       {commits.length > 0 && (
-        <div className="select-none border-b border-border/40 bg-muted/30 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <div className="flex select-none items-center border-b border-border/40 bg-muted/30 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           <div
             className="flex-shrink-0"
             style={{ width: Math.max((maxLanes + 1) * 16, 48) }}
